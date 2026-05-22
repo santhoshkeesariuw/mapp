@@ -1,0 +1,461 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sites tree · UWorld Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.PAGE_META = { page: 'sites', title: 'Sites tree' };</script>
+<style>
+.page-ctx-menu {
+  position: fixed;
+  z-index: 9999;
+  background: var(--ink-2);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 224px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+  display: none;
+}
+.ctx-header {
+  padding: 8px 10px 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
+}
+.ctx-page-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 196px;
+}
+.ctx-page-url {
+  font-size: 11px;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 2px;
+}
+.ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-2);
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+}
+.ctx-item:hover { background: var(--ink-3); color: var(--text); }
+.ctx-item i { font-size: 15px; color: var(--text-3); flex-shrink: 0; }
+.ctx-item:hover i { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <main class="main">
+    <div class="page fade-in">
+
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">11 domains · 1,298 indexed pages</div>
+          <h1 class="page-title">Sites &amp; <em>page</em> hierarchy</h1>
+          <p class="page-sub">Every page across every site. Drill down to see traffic, ranking, conversion, and AI health for each URL. Click any page to open its detail view.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn"><i class="ti ti-plus"></i>Add site</button>
+          <button class="btn"><i class="ti ti-download"></i>Export tree</button>
+          <button class="btn btn-primary"><i class="ti ti-sparkles"></i>AI audit all</button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Total domains</div>
+          <div class="metric-value">11</div>
+          <div class="metric-delta up"><i class="ti ti-plus"></i>3 new this year</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Indexed pages</div>
+          <div class="metric-value">1,298</div>
+          <div class="metric-delta up"><i class="ti ti-trending-up"></i>+84 in 30d</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Healthy pages</div>
+          <div class="metric-value">72<span class="unit">%</span></div>
+          <div class="metric-delta up"><i class="ti ti-check"></i>936 / 1,298</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Needs attention</div>
+          <div class="metric-value">48</div>
+          <div class="metric-delta down"><i class="ti ti-alert-circle"></i>6 critical</div>
+        </div>
+      </div>
+
+      <div class="tree-container">
+        <div class="tree-toolbar">
+          <div class="tree-search">
+            <i class="ti ti-search"></i>
+            <input type="text" id="treeSearch" placeholder="Search pages, URLs, keywords…" />
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <div class="seg-tabs">
+              <button class="seg-tab on">All</button>
+              <button class="seg-tab">Healthy</button>
+              <button class="seg-tab">Warning</button>
+              <button class="seg-tab">Critical</button>
+            </div>
+            <button class="btn btn-sm" onclick="document.querySelectorAll('.tree-node').forEach(n => n.classList.add('expanded'))"><i class="ti ti-chevrons-down"></i>Expand</button>
+            <button class="btn btn-sm" onclick="document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('expanded'))"><i class="ti ti-chevrons-up"></i>Collapse</button>
+          </div>
+        </div>
+
+        <!-- Tree header -->
+        <div class="tree-col-header" style="display: grid; grid-template-columns: 28px 1fr auto auto auto auto auto; gap: 16px; padding: 8px 10px 12px; border-bottom: 1px solid var(--line); margin-bottom: 8px; font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500;">
+          <div></div>
+          <div>Site / page</div>
+          <div style="min-width: 60px; text-align: right;">Traffic</div>
+          <div style="min-width: 60px; text-align: right;">Rank</div>
+          <div style="min-width: 60px; text-align: right;">Conv.</div>
+          <div style="min-width: 60px; text-align: right;">AI score</div>
+          <div style="min-width: 60px; text-align: right;">Status</div>
+        </div>
+
+        <div class="tree" id="tree">
+          <!-- Tree content injected by JS below -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Page context menu -->
+<div id="pageCtxMenu" class="page-ctx-menu">
+  <div class="ctx-header">
+    <div class="ctx-page-name" id="ctxName">Page</div>
+    <div class="ctx-page-url" id="ctxUrl">/</div>
+  </div>
+  <a class="ctx-item" data-tab="overview"    href="#"><i class="ti ti-layout-dashboard"></i>Overview</a>
+  <a class="ctx-item" data-tab="heatmap"     href="#"><i class="ti ti-flame"></i>View heatmap</a>
+  <a class="ctx-item" data-tab="seo"         href="#"><i class="ti ti-search"></i>SEO audit</a>
+  <a class="ctx-item" data-tab="performance" href="#"><i class="ti ti-gauge"></i>Page performance</a>
+  <a class="ctx-item" data-tab="conversion"  href="#"><i class="ti ti-arrows-shuffle"></i>Conversion details</a>
+  <a class="ctx-item" data-tab="research"    href="#"><i class="ti ti-world-search"></i>Research</a>
+</div>
+
+<script src="app.js"></script>
+<script>
+  // Sites data — real UWorld domain structure
+  const sitesData = [
+    {
+      name: 'medical.uworld.com',
+      pages: 284, traffic: '1.18M', rank: 3.8, conv: '5.2%', score: 91, status: 'good',
+      vertical: 'Medical · USMLE, COMLEX, ABIM, ABFM',
+      sections: [
+        {
+          name: 'USMLE', icon: 'ti-clipboard-list',
+          pages: [
+            { name: 'USMLE® Step 1',    url: '/usmle/usmle-step-1/',    traffic: '184K', rank: 2, conv: '5.8%', score: 95, status: 'good' },
+            { name: 'USMLE Step 2 CK',  url: '/usmle/usmle-step-2-ck/', traffic: '128K', rank: 2, conv: '5.4%', score: 93, status: 'good' },
+            { name: 'USMLE Step 2 CS',  url: '/usmle/usmle-step-2-cs/', traffic: '42K',  rank: 4, conv: '3.8%', score: 84, status: 'good' },
+            { name: 'USMLE Step 3',     url: '/usmle/usmle-step-3/',    traffic: '68K',  rank: 3, conv: '4.6%', score: 90, status: 'good' },
+          ]
+        },
+        {
+          name: 'COMLEX', icon: 'ti-certificate',
+          pages: [
+            { name: 'COMLEX® Level 1', url: '/comlex/comlex-level-1/', traffic: '38K', rank: 5, conv: '4.2%', score: 86, status: 'good' },
+            { name: 'COMLEX Level 2',  url: '/comlex/comlex-level-2/', traffic: '24K', rank: 6, conv: '3.8%', score: 84, status: 'good' },
+          ]
+        },
+        {
+          name: 'Board Certifications', icon: 'ti-award',
+          pages: [
+            { name: 'Internal Medicine (ABIM®)', url: '/abim/', traffic: '52K', rank: 4, conv: '6.2%', score: 88, status: 'good' },
+            { name: 'Family Medicine (ABFM®)',   url: '/abfm/', traffic: '28K', rank: 5, conv: '5.8%', score: 86, status: 'good' },
+          ]
+        },
+        {
+          name: 'International & Library', icon: 'ti-world',
+          pages: [
+            { name: 'International Clinical QBank', url: '/international/clinical-qbank/', traffic: '44K', rank: 7, conv: '4.4%', score: 82, status: 'good' },
+            { name: 'Medical Library',              url: '/medical-library/',              traffic: '62K', rank: 5, conv: '3.2%', score: 88, status: 'good' },
+          ]
+        },
+      ]
+    },
+    {
+      name: 'pa.uworld.com',
+      pages: 48, traffic: '84K', rank: 6.2, conv: '4.8%', score: 84, status: 'good',
+      vertical: 'Physician Assistant · PANCE, PANRE',
+      sections: [
+        {
+          name: 'PA Certification', icon: 'ti-stethoscope',
+          pages: [
+            { name: 'PA (PANCE® | PANRE®)', url: '/', traffic: '84K', rank: 6, conv: '4.8%', score: 84, status: 'good' },
+          ]
+        },
+      ]
+    },
+    {
+      name: 'nursing.uworld.com',
+      pages: 142, traffic: '628K', rank: 4.4, conv: '4.6%', score: 88, status: 'good',
+      vertical: 'Nursing · NCLEX-RN, NCLEX-PN, FNP',
+      sections: [
+        {
+          name: 'NCLEX', icon: 'ti-clipboard-list',
+          pages: [
+            { name: 'NCLEX-RN®', url: '/nclex-rn/', traffic: '324K', rank: 1, conv: '5.8%', score: 95, status: 'good' },
+            { name: 'NCLEX-PN®', url: '/nclex-pn/', traffic: '148K', rank: 2, conv: '4.8%', score: 91, status: 'good' },
+          ]
+        },
+        {
+          name: 'Specialty', icon: 'ti-heart-rate-monitor',
+          pages: [
+            { name: 'Clinical Med Math', url: '/clinical-med-math/', traffic: '62K', rank: 8, conv: '3.2%', score: 78, status: 'warn' },
+            { name: 'FNP',               url: '/fnp/',               traffic: '44K', rank: 9, conv: '4.4%', score: 82, status: 'good' },
+          ]
+        },
+      ]
+    },
+    {
+      name: 'collegeprep.uworld.com',
+      pages: 168, traffic: '482K', rank: 7.2, conv: '3.4%', score: 76, status: 'warn',
+      vertical: 'High School Students · SAT, ACT, AP',
+      sections: [
+        {
+          name: 'For Students', icon: 'ti-school',
+          pages: [
+            { name: 'SAT®', url: '/sat/',      traffic: '184K', rank: 5, conv: '3.8%', score: 82, status: 'good' },
+            { name: 'ACT®', url: '/act/prep/', traffic: '148K', rank: 6, conv: '3.4%', score: 78, status: 'warn' },
+            { name: 'AP®',  url: '/ap/',       traffic: '98K',  rank: 8, conv: '2.8%', score: 72, status: 'warn' },
+          ]
+        },
+      ]
+    },
+    {
+      name: 'collegereadiness.uworld.com',
+      pages: 84, traffic: '124K', rank: 9.8, conv: '2.8%', score: 68, status: 'warn',
+      vertical: 'High School Educators · SAT, ACT, AP',
+      sections: [
+        {
+          name: 'For Educators', icon: 'ti-chalkboard',
+          pages: [
+            { name: 'AP® (Educators)',  url: '/ap/',  traffic: '48K', rank: 10, conv: '3.2%', score: 72, status: 'warn' },
+            { name: 'SAT® (Educators)', url: '/sat/', traffic: '42K', rank: 12, conv: '2.8%', score: 68, status: 'warn' },
+            { name: 'ACT® (Educators)', url: '/act/', traffic: '28K', rank: 14, conv: '2.4%', score: 64, status: 'warn' },
+          ]
+        },
+      ]
+    },
+    {
+      name: 'gradschool.uworld.com',
+      pages: 62, traffic: '284K', rank: 8.4, conv: '3.2%', score: 74, status: 'warn',
+      vertical: 'Grad School · MCAT',
+      sections: [
+        {
+          name: 'MCAT Prep', icon: 'ti-flask',
+          pages: [
+            { name: 'MCAT®', url: '/mcat/', traffic: '284K', rank: 8, conv: '3.2%', score: 74, status: 'warn' },
+          ]
+        },
+      ]
+    },
+    {
+      name: 'accounting.uworld.com',
+      pages: 124, traffic: '248K', rank: 6.8, conv: '4.2%', score: 82, status: 'good',
+      vertical: 'Accounting · CPA, CMA, CIA',
+      sections: [
+        {
+          name: 'Accounting Certifications', icon: 'ti-calculator',
+          pages: [
+            { name: 'CPA Review', url: '/cpa-review/', traffic: '148K', rank: 4,  conv: '4.8%', score: 86, status: 'good' },
+            { name: 'CMA Review', url: '/cma-review/', traffic: '64K',  rank: 8,  conv: '4.2%', score: 80, status: 'good' },
+            { name: 'CIA Review', url: '/cia-review/', traffic: '36K',  rank: 11, conv: '3.6%', score: 76, status: 'warn' },
+          ]
+        },
+      ]
+    },
+    {
+      name: 'finance.uworld.com',
+      pages: 82, traffic: '168K', rank: 7.4, conv: '3.8%', score: 78, status: 'warn',
+      vertical: 'Finance · CFA, CMT',
+      sections: [
+        {
+          name: 'Finance Certifications', icon: 'ti-chart-line',
+          pages: [
+            { name: 'CFA®', url: '/cfa/', traffic: '124K', rank: 6, conv: '4.2%', score: 82, status: 'good' },
+            { name: 'CMT®', url: '/cmt/', traffic: '44K',  rank: 9, conv: '3.4%', score: 74, status: 'warn' },
+          ]
+        },
+      ]
+    },
+    {
+      name: 'legal.uworld.com',
+      pages: 94, traffic: '142K', rank: 11.2, conv: '2.4%', score: 62, status: 'warn',
+      vertical: 'Legal · MBE',
+      sections: [
+        {
+          name: 'Bar Exam Prep', icon: 'ti-scale',
+          pages: [
+            { name: 'MBE®', url: '/mbe/', traffic: '142K', rank: 11, conv: '2.4%', score: 62, status: 'warn' },
+          ]
+        },
+      ]
+    },
+    {
+      name: 'themisbar.com',
+      pages: 124, traffic: '184K', rank: 8.6, conv: '2.8%', score: 68, status: 'warn',
+      vertical: 'Legal · Bar Review, LLM, MPRE',
+      sections: [
+        {
+          name: 'Bar Review', icon: 'ti-gavel',
+          pages: [
+            { name: 'Bar Review',     url: '/',                          traffic: '94K', rank: 8,  conv: '3.2%', score: 72, status: 'warn' },
+            { name: 'LLM Bar Review', url: '/international-bar-review',  traffic: '42K', rank: 12, conv: '2.2%', score: 64, status: 'warn' },
+            { name: 'MPRE®',          url: '/mpre',                      traffic: '28K', rank: 14, conv: '2.4%', score: 58, status: 'warn' },
+          ]
+        },
+      ]
+    },
+    {
+      name: 'pharmacy.uworld.com',
+      pages: 86, traffic: '124K', rank: 8.2, conv: '3.6%', score: 76, status: 'warn',
+      vertical: 'Pharmacy · NAPLEX, MPJE, CPJE',
+      sections: [
+        {
+          name: 'Pharmacy Certifications', icon: 'ti-pill',
+          pages: [
+            { name: 'NAPLEX®', url: '/naplex/', traffic: '68K', rank: 7,  conv: '4.2%', score: 80, status: 'good' },
+            { name: 'MPJE®',   url: '/mpje/',   traffic: '36K', rank: 10, conv: '3.2%', score: 74, status: 'warn' },
+            { name: 'CPJE',    url: '/cpje/',   traffic: '18K', rank: 14, conv: '2.8%', score: 68, status: 'warn' },
+          ]
+        },
+      ]
+    },
+  ];
+
+  const statusPill = s => {
+    if (s === 'good') return '<span class="pill pill-good">healthy</span>';
+    if (s === 'warn') return '<span class="pill pill-warn">warn</span>';
+    return '<span class="pill pill-bad">crit</span>';
+  };
+  const scoreColor = s => s >= 85 ? 'var(--good)' : s >= 65 ? 'var(--warn)' : 'var(--bad)';
+
+  function renderTree() {
+    const tree = document.getElementById('tree');
+    tree.innerHTML = sitesData.map((site, si) => `
+      <div class="tree-node" id="site-${si}">
+        <div class="tree-row site" onclick="document.getElementById('site-${si}').classList.toggle('expanded')">
+          <div class="tree-toggle"><i class="ti ti-chevron-right"></i></div>
+          <div class="tree-label">
+            <i class="ti ti-world"></i>
+            <span class="tree-name">${site.name}</span>
+            <span style="font-size: 11px; color: var(--text-3); margin-left: 8px;">${site.vertical}</span>
+          </div>
+          <div class="tree-meta"><span class="label">pages</span><span style="color: var(--text);">${site.pages}</span></div>
+          <div class="tree-meta"><span class="label">traffic</span><span style="color: var(--text);">${site.traffic}</span></div>
+          <div class="tree-meta"><span class="label">conv</span><span style="color: var(--text);">${site.conv}</span></div>
+          <div class="tree-meta"><span class="label">score</span><span style="color: ${scoreColor(site.score)}; font-weight: 600;">${site.score}</span></div>
+          <div class="tree-meta">${statusPill(site.status)}</div>
+        </div>
+        <div class="tree-children">
+          ${site.sections.map((section, sx) => `
+            <div class="tree-node" id="section-${si}-${sx}">
+              <div class="tree-row" onclick="event.stopPropagation(); document.getElementById('section-${si}-${sx}').classList.toggle('expanded')">
+                <div class="tree-toggle"><i class="ti ti-chevron-right"></i></div>
+                <div class="tree-label">
+                  <i class="ti ${section.icon}"></i>
+                  <span class="tree-name" style="font-weight: 400;">${section.name}</span>
+                  <span style="font-size: 11px; color: var(--text-3); margin-left: 6px;">${section.pages.length} pages</span>
+                </div>
+                <div class="tree-meta"></div>
+                <div class="tree-meta"></div>
+                <div class="tree-meta"></div>
+                <div class="tree-meta"></div>
+                <div class="tree-meta"></div>
+              </div>
+              <div class="tree-children">
+                ${section.pages.map(page => `
+                  <div class="tree-node">
+                    <div class="tree-row" onclick="showPageMenu(event, '${page.name}', '${page.url}', '${site.name}')" style="cursor:pointer;">
+                      <div class="tree-toggle" style="opacity: 0.2;"><i class="ti ti-point" style="font-size: 8px;"></i></div>
+                      <div class="tree-label">
+                        <i class="ti ti-file"></i>
+                        <span class="tree-name" style="font-weight: 400;">${page.name}</span>
+                        <span class="tree-url">${page.url}</span>
+                      </div>
+                      <div class="tree-meta">${page.traffic}</div>
+                      <div class="tree-meta">#${page.rank}</div>
+                      <div class="tree-meta">${page.conv}</div>
+                      <div class="tree-meta" style="color: ${scoreColor(page.score)}; font-weight: 600;">${page.score}</div>
+                      <div class="tree-meta">${statusPill(page.status)}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    // Auto-expand first site
+    document.getElementById('site-0').classList.add('expanded');
+  }
+
+  renderTree();
+
+  function showPageMenu(event, name, url, siteDomain) {
+    event.stopPropagation();
+    const menu = document.getElementById('pageCtxMenu');
+    document.getElementById('ctxName').textContent = name;
+    document.getElementById('ctxUrl').textContent  = url;
+    const key  = siteDomain.replace('.com', '');
+    const base = 'page-detail.html?site=' + encodeURIComponent(key)
+               + '&page=' + encodeURIComponent(url)
+               + '&name=' + encodeURIComponent(name)
+               + '&tab=';
+    menu.querySelectorAll('.ctx-item').forEach(a => {
+      a.href = base + a.dataset.tab;
+    });
+    menu.style.display = 'block';
+    const mw = menu.offsetWidth || 224;
+    const mh = menu.offsetHeight || 210;
+    let x = event.clientX + 6, y = event.clientY + 6;
+    if (x + mw > window.innerWidth  - 12) x = event.clientX - mw - 6;
+    if (y + mh > window.innerHeight - 12) y = window.innerHeight - mh - 12;
+    menu.style.left = x + 'px';
+    menu.style.top  = y + 'px';
+  }
+
+  document.addEventListener('click', e => {
+    const menu = document.getElementById('pageCtxMenu');
+    if (menu && !menu.contains(e.target)) menu.style.display = 'none';
+  });
+
+  // Search filter
+  document.getElementById('treeSearch').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll('.tree-node').forEach(n => {
+      const text = n.querySelector('.tree-row').textContent.toLowerCase();
+      n.style.display = (!q || text.includes(q)) ? '' : 'none';
+    });
+    // Expand all if searching
+    if (q) document.querySelectorAll('.tree-node').forEach(n => n.classList.add('expanded'));
+  });
+</script>
+
+</body>
+</html>
+

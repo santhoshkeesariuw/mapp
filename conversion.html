@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Conversion · UWorld</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.PAGE_META = { page: 'conversion', title: 'Conversion' };</script>
+<style>
+  .variant-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .variant-card { background: var(--ink-2); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; transition: all 0.2s; cursor: pointer; }
+  .variant-card:hover { border-color: var(--accent); }
+  .variant-card.best { border-color: var(--accent); }
+  .variant-preview {
+    height: 180px; background: linear-gradient(180deg, #F5F0E8 0%, #FAFAF8 100%);
+    position: relative; padding: 16px; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center;
+  }
+  .variant-body { padding: 14px 16px; }
+  .variant-name { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .variant-name h3 { font-size: 14px; font-weight: 500; }
+  .variant-lift { font-family: 'JetBrains Mono', monospace; color: var(--good); font-size: 14px; font-weight: 500; }
+  .mini-card-stack { display: flex; gap: 4px; }
+  .mini-card { width: 32px; height: 60px; background: #fff; border-radius: 3px; border: 1px solid rgba(0,0,0,0.08); }
+  .mini-card.featured { border-color: #B8895A; transform: scale(1.08); box-shadow: 0 2px 8px rgba(184, 137, 90, 0.2); }
+  .mini-header { width: 60%; height: 6px; background: #1A1F30; border-radius: 2px; margin-bottom: 8px; }
+  .mini-cta { width: 70%; height: 8px; background: #D4A574; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <main class="main">
+    <div class="page fade-in">
+
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">Heatmaps · A/B variants · Redesign</div>
+          <h1 class="page-title">Conversion &amp; <em>redesign</em> studio</h1>
+          <p class="page-sub">AI analyzes user behavior, generates redesign variants based on competitor patterns, and predicts conversion lift before you ship.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn"><i class="ti ti-eye"></i>View live page</button>
+          <button class="btn btn-primary"><i class="ti ti-sparkles"></i>Generate variant</button>
+        </div>
+      </div>
+
+      <div class="briefing">
+        <div class="briefing-head">
+          <span class="briefing-tag"><span class="pulse"></span>Highest impact redesign</span>
+          <span class="briefing-time">Projected lift +24% to +41%</span>
+        </div>
+        <h2 class="briefing-title" style="font-size: 24px;">/pricing on uworld-prep · 3 AI-generated variants ready.</h2>
+        <p style="font-size: 14px; color: var(--text-2); line-height: 1.7; max-width: 720px; position: relative;">Heatmap shows <b style="color: var(--text);">68% of users abandon at the plan toggle</b>. CompetitorX uses a 3-column layout with annual/monthly toggle below pricing — converts ~23% better in their tests. AI generated 3 variants below.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-versus"></i>3 AI-generated variants · /pricing</div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-sm">Compare side-by-side</button>
+            <button class="btn btn-sm btn-primary" onclick="showToast('A/B test launched', 'Variant C is now running at 33% traffic on uworld-prep.com/pricing')">Launch best</button>
+          </div>
+        </div>
+
+        <div class="variant-grid">
+          <!-- Variant A: Conservative -->
+          <div class="variant-card">
+            <div class="variant-preview">
+              <div class="mini-header"></div>
+              <div class="mini-card-stack">
+                <div class="mini-card"></div>
+                <div class="mini-card featured"></div>
+                <div class="mini-card"></div>
+              </div>
+              <div class="mini-cta" style="margin-top: 8px;"></div>
+            </div>
+            <div class="variant-body">
+              <div class="variant-name"><h3>A · Conservative</h3><span class="variant-lift">+12%</span></div>
+              <p style="font-size: 12px; color: var(--text-2); line-height: 1.5;">Keep current layout. Reposition toggle, add tooltips, larger CTAs.</p>
+              <div style="display: flex; gap: 4px; margin-top: 10px;">
+                <span class="pill pill-info">low risk</span>
+                <span class="pill pill-muted">2d ship</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Variant B: Balanced -->
+          <div class="variant-card best">
+            <div class="variant-preview" style="background: linear-gradient(180deg, #FAEFE0 0%, #FAFAF8 100%);">
+              <div class="mini-header"></div>
+              <div class="mini-card-stack">
+                <div class="mini-card"></div>
+                <div class="mini-card featured" style="height: 72px; transform: scale(1.12);"></div>
+                <div class="mini-card"></div>
+              </div>
+              <div style="display: flex; gap: 4px; margin-top: 4px;">
+                <div style="width: 16px; height: 6px; background: #1A1F30; border-radius: 2px;"></div>
+                <div style="width: 16px; height: 6px; background: #D4A574; border-radius: 2px;"></div>
+              </div>
+              <div class="mini-cta"></div>
+              <div style="position: absolute; top: 8px; right: 8px; background: #D4A574; color: #0A0E1A; font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: 600; font-family: 'JetBrains Mono', monospace;">RECOMMENDED</div>
+            </div>
+            <div class="variant-body">
+              <div class="variant-name"><h3>B · Balanced</h3><span class="variant-lift">+28%</span></div>
+              <p style="font-size: 12px; color: var(--text-2); line-height: 1.5;">Three-column with featured center plan. Annual toggle below. Social proof.</p>
+              <div style="display: flex; gap: 4px; margin-top: 10px;">
+                <span class="pill pill-info">medium risk</span>
+                <span class="pill pill-muted">5d ship</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Variant C: Aggressive -->
+          <div class="variant-card">
+            <div class="variant-preview" style="background: linear-gradient(180deg, #E8F0FA 0%, #FAFAF8 100%);">
+              <div class="mini-header"></div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 70%;">
+                <div style="background: #fff; border-radius: 3px; padding: 6px; border: 1px solid rgba(0,0,0,0.08);">
+                  <div style="height: 4px; background: #1A1F30; width: 60%; border-radius: 1px; margin-bottom: 4px;"></div>
+                  <div style="height: 12px; background: #D4A574; width: 80%; border-radius: 1px;"></div>
+                </div>
+                <div style="background: #fff; border-radius: 3px; padding: 6px; border: 1px solid #B8895A;">
+                  <div style="height: 4px; background: #1A1F30; width: 60%; border-radius: 1px; margin-bottom: 4px;"></div>
+                  <div style="height: 12px; background: #D4A574; width: 80%; border-radius: 1px;"></div>
+                </div>
+              </div>
+              <div class="mini-cta" style="background: #1A1F30;"></div>
+            </div>
+            <div class="variant-body">
+              <div class="variant-name"><h3>C · Aggressive</h3><span class="variant-lift">+41%</span></div>
+              <p style="font-size: 12px; color: var(--text-2); line-height: 1.5;">Quiz-led pricing. AI recommends plan based on user goal. Calculator below.</p>
+              <div style="display: flex; gap: 4px; margin-top: 10px;">
+                <span class="pill pill-warn">high risk</span>
+                <span class="pill pill-muted">10d ship</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Pages analyzed</div><div class="metric-value">847</div></div>
+        <div class="metric"><div class="metric-label">Redesign candidates</div><div class="metric-value">23</div><div class="metric-delta" style="color: var(--accent);">5 high-impact</div></div>
+        <div class="metric"><div class="metric-label">Active A/B tests</div><div class="metric-value">8</div><div class="metric-delta up"><i class="ti ti-flask"></i>3 ready to call</div></div>
+        <div class="metric"><div class="metric-label">Avg lift · 12 wins</div><div class="metric-value">+18<span class="unit">%</span></div><div class="metric-delta up"><i class="ti ti-trending-up"></i>$340K ARR</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i class="ti ti-flame"></i>Conversion funnel · UWorld-prep</div>
+          </div>
+          <div class="chart-wrap"><canvas id="funnelChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i class="ti ti-test-pipe"></i>Active experiments</div>
+          </div>
+          <table>
+            <tbody>
+              <tr><td><div style="font-weight: 500;">Pricing toggle position</div><div style="font-size: 11px; color: var(--text-3);">Variant B vs control · 47K visitors</div></td><td class="right"><span class="pill pill-good">+12.4%</span></td><td class="right"><button class="btn btn-sm btn-primary">Call</button></td></tr>
+              <tr><td><div style="font-weight: 500;">Hero CTA copy</div><div style="font-size: 11px; color: var(--text-3);">3 variants · 28K visitors</div></td><td class="right"><span class="pill pill-good">+6.8%</span></td><td class="right"><span class="pill pill-muted">running</span></td></tr>
+              <tr><td><div style="font-weight: 500;">Testimonial layout</div><div style="font-size: 11px; color: var(--text-3);">Carousel vs grid · 18K</div></td><td class="right"><span class="pill pill-warn">+1.2%</span></td><td class="right"><span class="pill pill-muted">running</span></td></tr>
+              <tr><td><div style="font-weight: 500;">Free trial duration</div><div style="font-size: 11px; color: var(--text-3);">7d vs 14d · 32K</div></td><td class="right"><span class="pill pill-good">+19.1%</span></td><td class="right"><button class="btn btn-sm btn-primary">Call</button></td></tr>
+              <tr><td><div style="font-weight: 500;">Plan recommendation widget</div><div style="font-size: 11px; color: var(--text-3);">On/off · 22K</div></td><td class="right"><span class="pill pill-good">+8.7%</span></td><td class="right"><button class="btn btn-sm btn-primary">Call</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-bulb"></i>AI redesign opportunities · ranked by predicted impact</div>
+        </div>
+        <table>
+          <thead><tr><th>Page</th><th>Site</th><th class="right">Current conv.</th><th>Issue (AI-detected)</th><th class="right">Predicted lift</th><th class="right">ARR impact</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>/pricing</td><td style="color: var(--text-2);">uworld-prep</td><td class="num right">2.1%</td><td style="color: var(--text-2); font-size: 12px;">Plan toggle abandonment 68%</td><td class="num right" style="color: var(--accent); font-weight: 500;">+32%</td><td class="num right">$184K</td><td class="right"><button class="btn btn-sm btn-primary">Open</button></td></tr>
+            <tr><td>/free-trial</td><td style="color: var(--text-2);">uworld-medical</td><td class="num right">4.8%</td><td style="color: var(--text-2); font-size: 12px;">Form length / 6 fields above fold</td><td class="num right" style="color: var(--accent); font-weight: 500;">+24%</td><td class="num right">$142K</td><td class="right"><button class="btn btn-sm">Open</button></td></tr>
+            <tr><td>/courses</td><td style="color: var(--text-2);">uworld-finance</td><td class="num right">1.4%</td><td style="color: var(--text-2); font-size: 12px;">No social proof above scroll</td><td class="num right" style="color: var(--accent); font-weight: 500;">+18%</td><td class="num right">$98K</td><td class="right"><button class="btn btn-sm">Open</button></td></tr>
+            <tr><td>/practice</td><td style="color: var(--text-2);">uworld-nursing</td><td class="num right">3.2%</td><td style="color: var(--text-2); font-size: 12px;">CTA below fold / low contrast</td><td class="num right" style="color: var(--accent); font-weight: 500;">+14%</td><td class="num right">$72K</td><td class="right"><button class="btn btn-sm">Open</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new Chart(document.getElementById('funnelChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Landing', 'Pricing', 'Plan select', 'Checkout', 'Purchase'],
+        datasets: [{ label: 'Users', data: [100000, 42000, 13500, 6800, 4200], backgroundColor: ['#D4A574', '#D4A574DD', '#D4A574AA', '#D4A57488', '#D4A57466'], borderRadius: 4, borderSkipped: false }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.parsed.x.toLocaleString() + ' users' } } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { size: 11 }, callback: v => (v/1000) + 'K' } },
+          y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
+

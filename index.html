@@ -1,0 +1,464 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Overview · UWorld Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+/* ── AI Ask response panel ── */
+.ai-response-wrap { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 16px; }
+.ai-thinking { display: flex; align-items: center; gap: 10px; color: var(--text-3); font-size: 13px; padding: 4px 0; }
+.ai-dots { display: flex; gap: 4px; align-items: center; }
+.ai-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); opacity: 0.3; animation: dotBounce 1.3s ease-in-out infinite; }
+.ai-dots span:nth-child(2) { animation-delay: 0.15s; }
+.ai-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dotBounce { 0%,80%,100%{opacity:.3;transform:scale(.85)}40%{opacity:1;transform:scale(1.1)} }
+.air-wrap { animation: fadeUp 0.3s ease; }
+.air-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.air-tag { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); }
+.air-close { background: none; border: 1px solid var(--line); color: var(--text-3); cursor: pointer; font-size: 13px; padding: 3px 8px; border-radius: 5px; transition: all .12s; font-family: inherit; display: flex; align-items: center; gap: 5px; }
+.air-close:hover { background: var(--ink-3); color: var(--text); }
+.air-q { font-size: 12px; color: var(--text-3); margin-bottom: 14px; font-style: italic; }
+.air-points { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.air-point { display: flex; gap: 12px; padding: 12px 14px; background: var(--ink-3); border-radius: 8px; border-left: 3px solid transparent; }
+.air-point.bad  { border-left-color: var(--bad); }
+.air-point.warn { border-left-color: var(--warn); }
+.air-point.good { border-left-color: var(--good); }
+.air-point.info { border-left-color: var(--info); }
+.air-point.acc  { border-left-color: var(--accent); }
+.air-point-icon { font-size: 17px; flex-shrink: 0; padding-top: 1px; }
+.air-point-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text); margin-bottom: 3px; }
+.air-point-text { font-size: 12px; color: var(--text-3); line-height: 1.65; }
+.air-num { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; padding: 1px 5px; background: var(--ink); border: 1px solid var(--line-2); border-radius: 3px; margin: 0 1px; }
+.air-good { color: var(--good); font-weight: 600; }
+.air-bad  { color: var(--bad);  font-weight: 600; }
+.air-acc  { color: var(--accent); font-weight: 600; }
+.air-rec { background: rgba(212,165,116,0.05); border: 1px solid rgba(212,165,116,0.18); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; }
+.air-rec-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+.air-rec-text { font-size: 13px; color: var(--text-2); line-height: 1.65; }
+.air-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 14px; }
+.air-table th { text-align: left; color: var(--text-3); font-weight: 500; padding: 6px 8px; border-bottom: 1px solid var(--line); font-size: 11px; }
+.air-table td { padding: 8px 8px; border-bottom: 1px solid var(--line); color: var(--text-2); }
+.air-table tr:last-child td { border-bottom: none; }
+.air-sources { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.air-source-lbl { font-size: 11px; color: var(--text-3); }
+.air-src { font-size: 10px; font-family: 'JetBrains Mono', monospace; background: var(--ink-3); border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px; color: var(--text-3); }
+.air-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.PAGE_META = { page: 'index', title: 'Overview', welcomeToast: { title: 'AI briefing ready', text: '3 critical items detected across 32 sites. Tap any alert to act.' } };</script>
+</head>
+<body>
+
+<div class="app">
+  <main class="main">
+    <div class="page fade-in">
+
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">Tuesday · May 12, 2026 · 09:14 IST</div>
+          <h1 class="page-title">Good morning, Ravi.<br><em>Three things</em> need you today.</h1>
+        </div>
+        <div class="page-actions">
+          <button class="btn"><i class="ti ti-download"></i>Export</button>
+          <button class="btn btn-primary"><i class="ti ti-sparkles"></i>Generate briefing</button>
+        </div>
+      </div>
+
+      <div class="briefing">
+        <div class="briefing-head">
+          <span class="briefing-tag"><span class="pulse"></span>Daily AI briefing</span>
+          <span class="briefing-time">Generated 09:14 · refreshed 4m ago</span>
+        </div>
+        <h2 class="briefing-title">Competitor pressure on medical vertical. Pricing conversion needs intervention.</h2>
+
+        <div class="alerts">
+          <div class="alert-row crit">
+            <div class="alert-num">01</div>
+            <div class="alert-body">
+              <div class="alert-title">CompetitorX launched a comparison page targeting uworld-prep.com</div>
+              <div class="alert-text">Four high-value keywords lost rank overnight (avg <b>-4.2 positions</b>). Their page is already at position 6 for "free medical practice test" (28K vol). Window to counter: <b>~48 hours</b>.</div>
+              <div class="alert-actions">
+                <button class="btn btn-sm btn-primary" onclick="showToast('Counter-content brief drafted', 'AI generated a 2,400-word comparison brief targeting 7 keywords. Assigned to Priya S. with 36h SLA.')">Draft counter-content</button>
+                <a class="btn btn-sm" href="competitors.html">View competitor</a>
+              </div>
+            </div>
+          </div>
+          <div class="alert-row warn">
+            <div class="alert-num">02</div>
+            <div class="alert-body">
+              <div class="alert-title">Pricing page conversion dropped 18% this week</div>
+              <div class="alert-text">Heatmap shows users abandoning at the <b>plan toggle</b>. AI redesign mockup ready with 3 variants — projected lift <b>+24% to +41%</b>.</div>
+              <div class="alert-actions">
+                <a class="btn btn-sm btn-primary" href="conversion.html">Open redesign studio</a>
+                <button class="btn btn-sm">View heatmap</button>
+              </div>
+            </div>
+          </div>
+          <div class="alert-row info">
+            <div class="alert-num">03</div>
+            <div class="alert-body">
+              <div class="alert-title">12 content pieces awaiting your approval — 4 are time-sensitive</div>
+              <div class="alert-text">AI quality scores all above 85. Average estimated traffic impact: <b>+62K monthly visits</b> if shipped this week.</div>
+              <div class="alert-actions">
+                <a class="btn btn-sm btn-primary" href="content.html">Review queue</a>
+                <button class="btn btn-sm" onclick="showToast('Auto-approval enabled', 'Items scoring above 90 will publish automatically.')">Auto-approve >90</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="briefing-actions">
+          <button class="btn"><i class="ti ti-microphone"></i>Voice briefing</button>
+          <button class="btn"><i class="ti ti-mail-forward"></i>Forward to team</button>
+          <button class="btn"><i class="ti ti-history"></i>Yesterday's briefing</button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Total traffic · 30d</div>
+          <div class="metric-value">2.4<span class="unit">M</span></div>
+          <div class="metric-delta up"><i class="ti ti-trending-up"></i>+12.3%</div>
+          <canvas class="spark" id="spark1" width="80" height="32"></canvas>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Avg position</div>
+          <div class="metric-value">8.2</div>
+          <div class="metric-delta up"><i class="ti ti-trending-up"></i>+1.4</div>
+          <canvas class="spark" id="spark2" width="80" height="32"></canvas>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Conversion rate</div>
+          <div class="metric-value">3.41<span class="unit">%</span></div>
+          <div class="metric-delta down"><i class="ti ti-trending-down"></i>-0.4pp</div>
+          <canvas class="spark" id="spark3" width="80" height="32"></canvas>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Revenue · 7d</div>
+          <div class="metric-value">$84<span class="unit">K</span></div>
+          <div class="metric-delta up"><i class="ti ti-trending-up"></i>+$11K</div>
+          <canvas class="spark" id="spark4" width="80" height="32"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="padding: 16px;" id="aiCard">
+        <div class="ai-bar">
+          <i class="ti ti-sparkles"></i>
+          <input type="text" id="aiInput" placeholder="Ask anything — why did conversion drop on uworld-prep last week?" />
+          <button class="btn btn-primary btn-sm" id="askBtn">Ask <i class="ti ti-arrow-right"></i></button>
+        </div>
+        <div class="chips" id="aiChips">
+          <button class="chip">Best redesign opportunities this month</button>
+          <button class="chip">Content calendar from trending keywords</button>
+          <button class="chip">Compare us vs CompetitorX</button>
+          <button class="chip">Which team members are overloaded?</button>
+          <button class="chip">Why is uworld-legal losing traffic?</button>
+        </div>
+        <div id="aiResponseArea"></div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i class="ti ti-chart-area-line"></i>Traffic across top 5 sites</div>
+            <div class="seg-tabs">
+              <button class="seg-tab">7d</button>
+              <button class="seg-tab on">30d</button>
+              <button class="seg-tab">90d</button>
+              <button class="seg-tab">YTD</button>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="trafficChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i class="ti ti-alert-triangle"></i>Watchlist</div>
+            <button class="btn btn-sm btn-ghost"><i class="ti ti-plus"></i></button>
+          </div>
+          <div>
+            <div style="padding: 12px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 13px; font-weight: 500;"><span class="status-dot red"></span>uworld-prep.com</div>
+                <div style="font-size: 11px; color: var(--text-3); margin-top: 2px; margin-left: 12px;">4 KWs lost rank</div>
+              </div>
+              <span class="pill pill-bad">-4</span>
+            </div>
+            <div style="padding: 12px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 13px; font-weight: 500;"><span class="status-dot yellow"></span>uworld-medical.com</div>
+                <div style="font-size: 11px; color: var(--text-3); margin-top: 2px; margin-left: 12px;">CWV degraded</div>
+              </div>
+              <span class="pill pill-warn">2.4s</span>
+            </div>
+            <div style="padding: 12px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 13px; font-weight: 500;"><span class="status-dot yellow"></span>uworld-finance.com</div>
+                <div style="font-size: 11px; color: var(--text-3); margin-top: 2px; margin-left: 12px;">CTR below target</div>
+              </div>
+              <span class="pill pill-warn">2.1%</span>
+            </div>
+            <div style="padding: 12px 0; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 13px; font-weight: 500;"><span class="status-dot red"></span>uworld-legal.com</div>
+                <div style="font-size: 11px; color: var(--text-3); margin-top: 2px; margin-left: 12px;">Conversion -18%</div>
+              </div>
+              <span class="pill pill-bad">crit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  // ── AI Ask mock engine ────────────────────────────────────────
+  const MOCK = {
+    'conversion': {
+      subtitle: '3 root causes identified',
+      sources: ['GA4','Hotjar','Ahrefs','Stripe'],
+      points: [
+        { cls:'bad', icon:'ti-toggle-left', head:'Plan toggle abandonment — 68% of exits', text:'Heatmap shows <span class="air-num">68%</span> of uworld-prep.com/pricing visitors exit at the monthly/annual plan toggle. On mobile (which is up <span class="air-num air-bad">+24% WoW</span>), the toggle is below the fold on most devices — users never see the full plan before bouncing.' },
+        { cls:'warn', icon:'ti-device-mobile', head:'Mobile traffic spike ↑24% WoW — converting 38% worse', text:'Mobile sessions hit <span class="air-num">62%</span> of total traffic this week. Mobile CVR is <span class="air-num air-bad">2.4%</span> vs desktop <span class="air-num air-good">3.9%</span>. The pricing page was not updated for the new mobile breakpoint shipped on May 8.' },
+        { cls:'info', icon:'ti-target-arrow', head:'CompetitorX /vs-uworld comparison page — 8 days live', text:'They launched a direct comparison page on May 4. "uworld vs amboss" and "best usmle qbank" are now leaking comparison-intent traffic to their domain. Estimated <span class="air-num">~4,200 visits/mo</span> redirected away.' },
+      ],
+      rec: 'Highest ROI action: Ship Redesign Variant B (3-column, toggle below pricing). Projected <span class="air-acc">+28% conversion lift</span> · 5-day ship · $184K ARR impact. Also consider pinning the plan toggle above the fold on mobile immediately — 1-day fix, estimated +8%.',
+      actions: [
+        { label: '<i class="ti ti-arrows-shuffle"></i> Open redesign studio', primary: true, fn: "location.href='conversion.html'" },
+        { label: '<i class="ti ti-flame"></i> View heatmap', primary: false, fn: "showToast('Heatmap loaded','Showing click/scroll map for uworld-prep.com/pricing · last 7 days')" },
+      ]
+    },
+    'redesign': {
+      subtitle: '4 pages ranked by ARR impact',
+      sources: ['GA4','Hotjar','Stripe'],
+      points: [
+        { cls:'acc', icon:'ti-currency-dollar', head:'/pricing — uworld-prep · +32% projected · $184K ARR', text:'Plan toggle abandonment at <span class="air-num">68%</span>. AI generated 3 variants. Variant B (3-column featured) projects the highest lift with medium implementation risk. <span class="air-good">5-day ship.</span>' },
+        { cls:'warn', icon:'ti-currency-dollar', head:'/free-trial — uworld-medical · +24% projected · $142K ARR', text:'6 form fields above the fold is causing <span class="air-num">54%</span> form abandonment. AI recommendation: reduce to 2 fields (email + goal), move rest to step 2. Low risk, 2-day ship.' },
+        { cls:'info', icon:'ti-currency-dollar', head:'/courses — uworld-finance · +18% projected · $98K ARR', text:'No social proof in the hero section. Users are scrolling 80% down to find testimonials. Moving the trust badge strip above the fold is estimated to lift CVR from <span class="air-num">1.4%</span> to <span class="air-num air-good">1.65%</span>.' },
+        { cls:'info', icon:'ti-currency-dollar', head:'/practice — uworld-nursing · +14% projected · $72K ARR', text:'Primary CTA button is below the fold on <span class="air-num">73%</span> of mobile sessions. Low contrast (#9AA1B2 on dark bg fails WCAG AA). Quick CSS fix — 1-day ship.' },
+      ],
+      rec: 'Combined ARR opportunity: <span class="air-acc">$496K/year</span> if all 4 are shipped this sprint. Recommend starting with /free-trial (fastest ship, lowest risk) while /pricing redesign is in design review.',
+      actions: [
+        { label: '<i class="ti ti-arrows-shuffle"></i> Open conversion studio', primary: true, fn: "location.href='conversion.html'" },
+        { label: '<i class="ti ti-download"></i> Export report', primary: false, fn: "showToast('Report exported','Redesign opportunities PDF sent to ravi@uworld.com')" },
+      ]
+    },
+    'content calendar': {
+      subtitle: 'Next 4 weeks · 14 topics prioritized',
+      sources: ['Ahrefs','Google Trends','GSC'],
+      points: [
+        { cls:'acc', icon:'ti-calendar-week', head:'Week 1 (May 26–31) — USMLE Step 1 season peak', text:'Trending: <span class="air-num">+34% search interest</span> for USMLE Step 1 content. Publish: 4 blog posts (step 1 mistakes, ck question bank guide, anki vs uworld, study schedule). Est. traffic: <span class="air-good">+18K visits</span>.' },
+        { cls:'warn', icon:'ti-calendar-week', head:'Week 2 (Jun 2–7) — Bar exam season · legal vertical push', text:'July bar exam 8 weeks out — search volume for "bar exam prep" up <span class="air-num">+62%</span> YoY. Publish: 3 articles + 1 video script. Counter CompetitorX /bar-exam-guide with a stronger comparison piece.' },
+        { cls:'info', icon:'ti-calendar-week', head:'Week 3 (Jun 9–14) — CFA Level 1 June exam window', text:'CFA Level 1 exams begin June 14–20. Publish: 4 articles targeting "CFA formula sheet", "CFA mock exam", "CFA level 1 tips 2026". Est. traffic: <span class="air-good">+12K visits</span>.' },
+        { cls:'good', icon:'ti-calendar-week', head:'Week 4 (Jun 16–21) — NCLEX + email nurture launch', text:'NCLEX test volume stable year-round. Ship 3 practice-focused articles + launch the 7-email MCAT nurture sequence (already in queue, AI score 90). Predicted email CTR: <span class="air-good">+24%</span> above baseline.' },
+      ],
+      rec: 'Total estimated traffic if all 14 pieces ship on schedule: <span class="air-acc">+62K monthly visits</span>. All briefs are pre-generated and waiting in the Content queue.',
+      actions: [
+        { label: '<i class="ti ti-edit"></i> Open content queue', primary: true, fn: "location.href='content.html'" },
+        { label: '<i class="ti ti-calendar"></i> View full calendar', primary: false, fn: "showToast('Calendar view','Opening publishing calendar for June 2026...')" },
+      ]
+    },
+    'compare': {
+      subtitle: 'uWorld vs CompetitorX · 6 dimensions',
+      sources: ['Ahrefs','SimilarWeb','GSC'],
+      tableHead: ['Metric','UWorld','CompetitorX','Edge'],
+      tableRows: [
+        ['Keywords ranking','<span class="air-good">4,210</span>','3,847','<span class="pill pill-good" style="font-size:10px;">+9% ✓</span>'],
+        ['Top 3 positions','<span class="air-good">312</span>','284','<span class="pill pill-good" style="font-size:10px;">+10% ✓</span>'],
+        ['Backlinks · 30d','1,247','<span class="air-bad">1,883</span>','<span class="pill pill-bad" style="font-size:10px;">-34% ✗</span>'],
+        ['Avg page speed','2.1s','<span class="air-bad">1.4s</span>','<span class="pill pill-bad" style="font-size:10px;">Slower ✗</span>'],
+        ['Content velocity','<span class="air-good">14/wk</span>','9/wk','<span class="pill pill-good" style="font-size:10px;">+55% ✓</span>'],
+        ['Domain authority','76','<span class="air-bad">81</span>','<span class="pill pill-bad" style="font-size:10px;">-5pts ✗</span>'],
+      ],
+      rec: 'We lead in keyword volume and content output. The two critical gaps are <span class="air-bad">backlink acquisition</span> (they\'re earning 50% more links/month) and <span class="air-bad">page speed</span>. Fixing LCP from 2.1s → under 1.8s on top 5 pages could shift 200–300 keywords up 1–3 positions.',
+      actions: [
+        { label: '<i class="ti ti-target-arrow"></i> Open competitors', primary: true, fn: "location.href='competitors.html'" },
+        { label: '<i class="ti ti-sparkles"></i> Generate counter-strategy', primary: false, fn: "showToast('Counter-strategy generated','Full competitive response plan drafted. 7 actions across SEO, content, and link building.')" },
+      ]
+    },
+    'overloaded': {
+      subtitle: 'Team capacity · 4 members analysed',
+      sources: ['Internal task data','Content queue'],
+      points: [
+        { cls:'bad', icon:'ti-alert-triangle', head:'Marcus T. — overloaded by 50%', text:'<span class="air-num">18 active tasks</span> vs capacity of 12. He\'s assigned across Medical, Finance, and Nursing verticals simultaneously. Current SLA breach risk: <span class="air-bad">HIGH</span>. 4 tasks are blocking the content queue.' },
+        { cls:'warn', icon:'ti-alert-circle', head:'Priya S. — at capacity', text:'<span class="air-num">14 active tasks</span> vs capacity of 15. She\'s the primary owner of the USMLE brief series and the competitor counter-content. One more brief assignment would push her over.' },
+        { cls:'good', icon:'ti-check', head:'Anu R. — available capacity', text:'<span class="air-num">8 active tasks</span> vs capacity of 12. She has skills matching 3 of the 4 overflow tasks from Marcus (nursing content). Reassigning to Anu would resolve the blocker.' },
+        { cls:'good', icon:'ti-check', head:'Divya K. — available capacity', text:'<span class="air-num">6 active tasks</span> vs capacity of 10. Best suited for the email and video scripts currently sitting in Marcus\'s queue.' },
+      ],
+      rec: 'AI recommendation: Move 3 nursing content tasks from Marcus → Anu R, and 1 email script from Marcus → Divya K. This clears the content queue blocker and gets <span class="air-acc">4 time-sensitive pieces</span> back on track for this week.',
+      actions: [
+        { label: '<i class="ti ti-users"></i> Open Team page', primary: true, fn: "location.href='team.html'" },
+        { label: '<i class="ti ti-arrows-transfer-up"></i> Reassign tasks', primary: false, fn: "showToast('Tasks reassigned','3 tasks moved to Anu R · 1 task moved to Divya K. Marcus notified.')" },
+      ]
+    },
+    'legal': {
+      subtitle: '3 root causes · -18% traffic in 30d',
+      sources: ['GSC','Ahrefs','PageSpeed Insights'],
+      points: [
+        { cls:'bad', icon:'ti-chart-line', head:'3 high-value keywords fell out of top 10', text:'"Bar exam study guide 2026" dropped <span class="air-num">pos 4 → 11</span> · "Constitutional law notes" dropped <span class="air-num">pos 6 → 15</span> · "Multistate bar exam prep" dropped <span class="air-num">pos 3 → 12</span>. Combined loss: ~<span class="air-bad">38K monthly visits</span>.' },
+        { cls:'bad', icon:'ti-gauge', head:'Core Web Vitals failed — LCP 3.8s (threshold: 2.5s)', text:'uworld-legal.com has the worst CWV scores in the portfolio. LCP at <span class="air-num air-bad">3.8s</span>, CLS at <span class="air-num air-bad">0.22</span>. Google\'s algorithm update on May 3 explicitly penalised slow legal/edu pages. <span class="air-bad">Likely the primary cause.</span>' },
+        { cls:'warn', icon:'ti-target-arrow', head:'ExamCo launched 3 competing pages last month', text:'ExamCo.com published "/bar-exam-2026-guide", "/mbe-prep-tips", and "/essay-writing-bar" — all directly targeting our top 3 lost keywords. They have DA 62 vs our 54 in the legal vertical.' },
+      ],
+      rec: 'Priority 1 (this week): Fix Core Web Vitals — compress hero images, defer non-critical JS. This alone should recover 1.5–2 ranking positions across all affected pages within 3–4 weeks. Priority 2: Refresh the 3 dropped pages with updated 2026 content and schema markup.',
+      actions: [
+        { label: '<i class="ti ti-chart-line"></i> Open SEO page', primary: true, fn: "location.href='seo.html'" },
+        { label: '<i class="ti ti-sparkles"></i> Generate fix plan', primary: false, fn: "showToast('Fix plan generated','Core Web Vitals repair brief + content refresh plan for 3 pages created. Assigned to Marcus T.')" },
+      ]
+    },
+    'default': {
+      subtitle: 'Workspace summary',
+      sources: ['GA4','GSC','Ahrefs','Stripe'],
+      points: [
+        { cls:'good', icon:'ti-trending-up', head:'Traffic up +12.3% · 2.4M sessions in 30d', text:'Organic search is the dominant channel at <span class="air-num">64%</span> of sessions. Medical and nursing verticals are driving most of the growth. USMLE and NCLEX keywords are trending strong.' },
+        { cls:'warn', icon:'ti-alert-triangle', head:'2 active issues need your attention today', text:'Conversion rate on uworld-prep.com/pricing is down <span class="air-num air-bad">-18%</span> week-over-week. uworld-legal.com is losing organic traffic after the May 3 algorithm update. Both have action plans ready.' },
+        { cls:'acc', icon:'ti-currency-dollar', head:'$84K revenue in last 7 days · +$11K vs prior week', text:'Medical vertical continues to be the highest revenue driver at <span class="air-num">$284K/mo</span>. Finance is the fastest growing at <span class="air-good">+22% MoM</span>. Legal is the only vertical declining.' },
+      ],
+      rec: 'Top 3 actions for today: (1) Review the 4 time-sensitive content pieces in the queue, (2) Launch the pricing page A/B test, (3) Open the competitor counter-content brief for CompetitorX.',
+      actions: [
+        { label: '<i class="ti ti-sparkles"></i> Generate full briefing', primary: true, fn: "showToast('Full briefing generated','AI analysed 32 sites · 14,820 keywords · 847 pages. Report ready.')" },
+        { label: '<i class="ti ti-edit"></i> Content queue', primary: false, fn: "location.href='content.html'" },
+      ]
+    }
+  };
+
+  function findResponse(q) {
+    q = q.toLowerCase();
+    if (q.includes('conversion') || q.includes('drop') || q.includes('pricing')) return MOCK['conversion'];
+    if (q.includes('redesign') || q.includes('opportunit')) return MOCK['redesign'];
+    if (q.includes('content calendar') || q.includes('trending keyword') || q.includes('calendar')) return MOCK['content calendar'];
+    if (q.includes('compare') || q.includes('competitorx') || q.includes('vs')) return MOCK['compare'];
+    if (q.includes('overload') || q.includes('team') || q.includes('capacity')) return MOCK['overloaded'];
+    if (q.includes('legal') || q.includes('losing traffic')) return MOCK['legal'];
+    return MOCK['default'];
+  }
+
+  function closeAiResponse() {
+    const area = document.getElementById('aiResponseArea');
+    if (area) area.innerHTML = '';
+    const input = document.getElementById('aiInput');
+    if (input) input.value = '';
+  }
+
+  function handleAsk(query) {
+    if (!query || !query.trim()) return;
+    const area = document.getElementById('aiResponseArea');
+    if (!area) return;
+
+    // Show thinking state
+    area.innerHTML = `
+      <div class="ai-response-wrap">
+        <div class="ai-thinking" id="aiThinking">
+          <div class="ai-dots"><span></span><span></span><span></span></div>
+          <span>Analysing across GA4 · Ahrefs · Hotjar · Stripe…</span>
+        </div>
+      </div>`;
+
+    // Scroll to response
+    setTimeout(() => area.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+
+    setTimeout(() => {
+      const r = findResponse(query);
+
+      // Build table or points
+      let bodyHtml = '';
+      if (r.tableRows) {
+        bodyHtml = `<table class="air-table">
+          <thead><tr>${r.tableHead.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+          <tbody>${r.tableRows.map(row => `<tr>${row.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+        </table>`;
+      } else {
+        bodyHtml = `<div class="air-points">${r.points.map(p => `
+          <div class="air-point ${p.cls}">
+            <div class="air-point-icon"><i class="ti ${p.icon}"></i></div>
+            <div>
+              <div class="air-point-head">${p.head}</div>
+              <div class="air-point-text">${p.text}</div>
+            </div>
+          </div>`).join('')}</div>`;
+      }
+
+      area.innerHTML = `
+        <div class="ai-response-wrap">
+          <div class="air-wrap">
+            <div class="air-hd">
+              <div class="air-tag"><i class="ti ti-sparkles"></i>AI Analysis · ${r.subtitle}</div>
+              <button class="air-close" onclick="closeAiResponse()"><i class="ti ti-x"></i> Clear</button>
+            </div>
+            <div class="air-q">"${query}"</div>
+            ${bodyHtml}
+            <div class="air-rec">
+              <div class="air-rec-lbl"><i class="ti ti-bulb"></i>Recommendation</div>
+              <div class="air-rec-text">${r.rec}</div>
+            </div>
+            <div class="air-sources">
+              <span class="air-source-lbl">Sources:</span>
+              ${r.sources.map(s => `<span class="air-src">${s}</span>`).join('')}
+            </div>
+            <div class="air-acts">
+              ${r.actions.map(a => `<button class="btn btn-sm ${a.primary ? 'btn-primary' : ''}" onclick="${a.fn}">${a.label}</button>`).join('')}
+            </div>
+          </div>
+        </div>`;
+
+      area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 1600);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    spark('spark1', [180,195,210,205,225,240,255,268], '#4ADE80');
+    spark('spark2', [10.2,9.8,9.5,9.1,8.9,8.6,8.3,8.2], '#4ADE80');
+    spark('spark3', [3.9,3.8,3.8,3.7,3.6,3.5,3.4,3.41], '#F87171');
+    spark('spark4', [62,68,70,72,74,78,82,84], '#D4A574');
+
+    // Ask button
+    const askBtn   = document.getElementById('askBtn');
+    const aiInput  = document.getElementById('aiInput');
+    const aiChips  = document.getElementById('aiChips');
+    askBtn && askBtn.addEventListener('click', () => handleAsk(aiInput.value.trim() || aiInput.placeholder));
+    aiInput && aiInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleAsk(aiInput.value.trim() || aiInput.placeholder); });
+    aiChips && aiChips.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        aiInput.value = chip.textContent.trim();
+        handleAsk(chip.textContent.trim());
+      });
+    });
+
+    new Chart(document.getElementById('trafficChart'), {
+      type: 'line',
+      data: {
+        labels: ['Apr 12','Apr 19','Apr 26','May 3','May 10','May 17','May 24','May 31'],
+        datasets: [
+          { label: 'medical', data: [180,195,210,205,225,240,255,268], borderColor: '#D4A574', backgroundColor: 'rgba(212,165,116,0.08)', tension: 0.4, borderWidth: 2, fill: true, pointRadius: 0, pointHoverRadius: 4 },
+          { label: 'nursing', data: [140,148,152,158,165,170,178,185], borderColor: '#60A5FA', backgroundColor: 'transparent', tension: 0.4, borderWidth: 1.5, pointRadius: 0 },
+          { label: 'finance', data: [95,102,108,115,118,124,128,132], borderColor: '#C4B5FD', backgroundColor: 'transparent', tension: 0.4, borderWidth: 1.5, pointRadius: 0 },
+          { label: 'prep', data: [120,125,128,130,128,125,118,112], borderColor: '#F87171', backgroundColor: 'transparent', tension: 0.4, borderWidth: 1.5, borderDash: [4,3], pointRadius: 0 },
+          { label: 'legal', data: [75,78,82,85,84,86,88,90], borderColor: '#4ADE80', backgroundColor: 'transparent', tension: 0.4, borderWidth: 1.5, pointRadius: 0 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 8, boxHeight: 8, padding: 12, font: { size: 11 }, usePointStyle: true } },
+          tooltip: { backgroundColor: '#1C2233', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, padding: 10, callbacks: { label: c => c.dataset.label + ': ' + c.parsed.y + 'K' } }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+          y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { size: 11 }, callback: v => v + 'K' } }
+        }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
+

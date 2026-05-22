@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Competitors · UWorld</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.PAGE_META = { page: 'competitors', title: 'Competitors' };</script>
+</head>
+<body>
+
+<div class="app">
+  <main class="main">
+    <div class="page fade-in">
+
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">Intelligence · Tracking 8 competitors</div>
+          <h1 class="page-title">Competitive <em>landscape</em></h1>
+          <p class="page-sub">Real-time tracking of competitor pages, keywords, backlinks, and content velocity. AI alerts you the moment they ship something that matters.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn"><i class="ti ti-plus"></i>Track competitor</button>
+          <button class="btn btn-primary"><i class="ti ti-sparkles"></i>Counter-strategy</button>
+        </div>
+      </div>
+
+      <div class="briefing">
+        <div class="briefing-head">
+          <span class="briefing-tag"><span class="pulse"></span>Competitor activity · last 24h</span>
+          <span class="briefing-time">3 alerts · 2 critical</span>
+        </div>
+        <h2 class="briefing-title" style="font-size: 24px;">CompetitorX shipped 3 new pages targeting our medical vertical.</h2>
+        <div class="alerts">
+          <div class="alert-row crit">
+            <div class="alert-num">A</div>
+            <div class="alert-body">
+              <div class="alert-title">Free practice test launch — <span class="mono" style="color: var(--accent); font-size: 12px;">/free-medical-practice</span></div>
+              <div class="alert-text">Already ranking <b>position 6</b> for "free medical practice test" (28K vol). Recommendation: ship our own interactive tool within <b>14 days</b>.</div>
+              <div class="alert-actions">
+                <button class="btn btn-sm btn-primary">Draft counter-tool</button>
+                <button class="btn btn-sm">View their page</button>
+              </div>
+            </div>
+          </div>
+          <div class="alert-row warn">
+            <div class="alert-num">B</div>
+            <div class="alert-body">
+              <div class="alert-title">Side-by-side comparison page — <span class="mono" style="color: var(--accent); font-size: 12px;">/vs-uworld</span></div>
+              <div class="alert-text">Direct brand attack. They claim 3 advantages we can rebut with our actual data.</div>
+            </div>
+          </div>
+          <div class="alert-row info">
+            <div class="alert-num">C</div>
+            <div class="alert-body">
+              <div class="alert-title">Interactive pricing calculator deployed</div>
+              <div class="alert-text">UX heavy. Likely to lift their conversion 8–15%.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i class="ti ti-chart-pie"></i>Share of voice · medical niche</div>
+            <span class="card-sub">Last 30d</span>
+          </div>
+          <div class="chart-wrap"><canvas id="sovChart"></canvas></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i class="ti ti-versus"></i>uWorld vs CompetitorX</div>
+          </div>
+          <table>
+            <tbody>
+              <tr><td style="color: var(--text-2); font-size: 12px;">Keywords ranking</td><td class="num right" style="font-weight: 500;">4,210</td><td class="right mono" style="color: var(--text-3); font-size: 12px;">vs 3,847</td><td class="right"><span class="pill pill-good">+9%</span></td></tr>
+              <tr><td style="color: var(--text-2); font-size: 12px;">Top 3 positions</td><td class="num right" style="font-weight: 500;">312</td><td class="right mono" style="color: var(--text-3); font-size: 12px;">vs 284</td><td class="right"><span class="pill pill-good">+10%</span></td></tr>
+              <tr><td style="color: var(--text-2); font-size: 12px;">Backlinks · 30d</td><td class="num right" style="font-weight: 500;">1,247</td><td class="right mono" style="color: var(--text-3); font-size: 12px;">vs 1,883</td><td class="right"><span class="pill pill-bad">-34%</span></td></tr>
+              <tr><td style="color: var(--text-2); font-size: 12px;">Avg page speed</td><td class="num right" style="font-weight: 500;">2.1s</td><td class="right mono" style="color: var(--text-3); font-size: 12px;">vs 1.4s</td><td class="right"><span class="pill pill-bad">slower</span></td></tr>
+              <tr><td style="color: var(--text-2); font-size: 12px;">Content velocity</td><td class="num right" style="font-weight: 500;">14/wk</td><td class="right mono" style="color: var(--text-3); font-size: 12px;">vs 9/wk</td><td class="right"><span class="pill pill-good">+55%</span></td></tr>
+              <tr><td style="color: var(--text-2); font-size: 12px;">Domain authority</td><td class="num right" style="font-weight: 500;">76</td><td class="right mono" style="color: var(--text-3); font-size: 12px;">vs 81</td><td class="right"><span class="pill pill-bad">-5pts</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-list"></i>Tracked competitors</div>
+        </div>
+        <table>
+          <thead><tr><th>Competitor</th><th>Vertical</th><th class="right">DA</th><th class="right">Keywords</th><th class="right">Traffic est.</th><th class="right">Content/wk</th><th class="right">Threat level</th></tr></thead>
+          <tbody>
+            <tr><td><b>CompetitorX</b></td><td style="color: var(--text-2);">Medical, nursing</td><td class="num right">81</td><td class="num right">3,847</td><td class="num right">1.2M</td><td class="num right">9</td><td class="right"><span class="pill pill-bad">high</span></td></tr>
+            <tr><td><b>CompetitorY</b></td><td style="color: var(--text-2);">Finance, accounting</td><td class="num right">74</td><td class="num right">2,142</td><td class="num right">680K</td><td class="num right">6</td><td class="right"><span class="pill pill-warn">medium</span></td></tr>
+            <tr><td><b>CompetitorZ</b></td><td style="color: var(--text-2);">Test prep</td><td class="num right">72</td><td class="num right">1,884</td><td class="num right">540K</td><td class="num right">5</td><td class="right"><span class="pill pill-warn">medium</span></td></tr>
+            <tr><td><b>PrepProvider</b></td><td style="color: var(--text-2);">Medical</td><td class="num right">68</td><td class="num right">1,612</td><td class="num right">420K</td><td class="num right">8</td><td class="right"><span class="pill pill-warn">medium</span></td></tr>
+            <tr><td><b>ExamCo</b></td><td style="color: var(--text-2);">Legal</td><td class="num right">62</td><td class="num right">948</td><td class="num right">280K</td><td class="num right">3</td><td class="right"><span class="pill pill-muted">low</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-target-arrow"></i>Keyword gap · they rank, we don't</div>
+          <button class="btn btn-sm btn-primary"><i class="ti ti-sparkles"></i>Brief all 10</button>
+        </div>
+        <table>
+          <thead><tr><th>Keyword</th><th>Their site</th><th class="right">Their pos.</th><th class="right">Volume</th><th class="right">Difficulty</th><th class="right">Opportunity</th><th class="right"></th></tr></thead>
+          <tbody>
+            <tr><td>step 2 ck question bank</td><td style="color: var(--text-2);">competitorx.com</td><td class="num right">3</td><td class="num right">14K</td><td class="num right">42</td><td class="right"><span class="pill pill-good">high</span></td><td class="right"><button class="btn btn-sm">Brief</button></td></tr>
+            <tr><td>usmle anki deck premium</td><td style="color: var(--text-2);">competitorx.com</td><td class="num right">5</td><td class="num right">9.2K</td><td class="num right">28</td><td class="right"><span class="pill pill-good">high</span></td><td class="right"><button class="btn btn-sm">Brief</button></td></tr>
+            <tr><td>medical mnemonics complete</td><td style="color: var(--text-2);">competitory.io</td><td class="num right">2</td><td class="num right">22K</td><td class="num right">61</td><td class="right"><span class="pill pill-warn">medium</span></td><td class="right"><button class="btn btn-sm">Brief</button></td></tr>
+            <tr><td>pediatrics shelf exam prep</td><td style="color: var(--text-2);">competitorx.com</td><td class="num right">4</td><td class="num right">6.1K</td><td class="num right">24</td><td class="right"><span class="pill pill-good">high</span></td><td class="right"><button class="btn btn-sm">Brief</button></td></tr>
+            <tr><td>nursing care plan templates</td><td style="color: var(--text-2);">competitorz.net</td><td class="num right">2</td><td class="num right">33K</td><td class="num right">38</td><td class="right"><span class="pill pill-good">high</span></td><td class="right"><button class="btn btn-sm">Brief</button></td></tr>
+            <tr><td>cfa formula sheet pdf</td><td style="color: var(--text-2);">competitorx.com</td><td class="num right">6</td><td class="num right">11K</td><td class="num right">31</td><td class="right"><span class="pill pill-warn">medium</span></td><td class="right"><button class="btn btn-sm">Brief</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new Chart(document.getElementById('sovChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['uWorld 38%', 'CompetitorX 31%', 'CompetitorY 18%', 'Others 13%'],
+        datasets: [{ data: [38, 31, 18, 13], backgroundColor: ['#D4A574', '#F87171', '#C4B5FD', '#5E6478'], borderColor: '#131826', borderWidth: 2 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '60%',
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, boxHeight: 8, padding: 12, font: { size: 11 }, usePointStyle: true } } }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
+

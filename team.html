@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Team · UWorld</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.PAGE_META = { page: 'team', title: 'Team' };</script>
+</head>
+<body>
+
+<div class="app">
+  <main class="main">
+    <div class="page fade-in">
+
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">Workforce · Workload · Output</div>
+          <h1 class="page-title">Team &amp; <em>operations</em></h1>
+          <p class="page-sub">104 marketers across SEO, content, design, and engineering. AI surfaces overload, suggests reassignments, and tracks cycle time.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn"><i class="ti ti-users"></i>Org chart</button>
+          <button class="btn btn-primary"><i class="ti ti-sparkles"></i>Auto-rebalance</button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Active members</div><div class="metric-value">104</div></div>
+        <div class="metric"><div class="metric-label">Open tasks</div><div class="metric-value">287</div><div class="metric-delta down"><i class="ti ti-alert-circle"></i>14 blocked</div></div>
+        <div class="metric"><div class="metric-label">Avg cycle time</div><div class="metric-value">2.4<span class="unit">d</span></div><div class="metric-delta up"><i class="ti ti-trending-down"></i>-0.6d</div></div>
+        <div class="metric"><div class="metric-label">Sprint velocity</div><div class="metric-value">142<span class="unit">pts</span></div><div class="metric-delta up"><i class="ti ti-trending-up"></i>+18%</div></div>
+      </div>
+
+      <div class="briefing">
+        <div class="briefing-head">
+          <span class="briefing-tag"><span class="pulse"></span>Workload AI</span>
+          <span class="briefing-time">Updated 2m ago</span>
+        </div>
+        <h2 class="briefing-title" style="font-size: 24px;">3 specialists are over capacity. 4 are under-utilized.</h2>
+        <p style="font-size: 14px; color: var(--text-2); line-height: 1.7; max-width: 720px; position: relative;">Priya, Rakesh, and Anu are at <b style="color: var(--bad);">120%+ capacity</b> this sprint — risking the competitor counter-content deadline. Meanwhile 4 medical content writers have spare capacity. AI suggests reassigning <b style="color: var(--text);">6 tasks</b>.</p>
+        <div class="briefing-actions" style="margin-top: 18px;">
+          <button class="btn btn-primary" onclick="showToast('6 tasks rebalanced', '4 reassignments to Divya, Sameer, Aisha and Marcus. All affected team members notified.')">Apply rebalance</button>
+          <button class="btn">Review suggestions</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-layout-kanban"></i>Sprint 23 · current state</div>
+          <div class="seg-tabs">
+            <button class="seg-tab on">My view</button>
+            <button class="seg-tab">SEO</button>
+            <button class="seg-tab">Content</button>
+            <button class="seg-tab">Design</button>
+          </div>
+        </div>
+
+        <div class="kanban">
+          <div class="kanban-col">
+            <div class="kanban-head"><span>Backlog</span><span class="kanban-count">14</span></div>
+            <div class="kanban-card"><div class="kanban-card-t">Step 2 CK content series</div><div class="kanban-meta"><span>SEO</span><span class="pill pill-bad">P0</span></div></div>
+            <div class="kanban-card"><div class="kanban-card-t">Pricing A/B redesign</div><div class="kanban-meta"><span>Design</span><span class="pill pill-warn">P1</span></div></div>
+            <div class="kanban-card"><div class="kanban-card-t">Nursing care plan templates</div><div class="kanban-meta"><span>Content</span><span class="pill pill-warn">P1</span></div></div>
+            <div class="kanban-card"><div class="kanban-card-t">Backlink outreach Q2</div><div class="kanban-meta"><span>Off-page</span><span class="pill pill-muted">P2</span></div></div>
+          </div>
+          <div class="kanban-col">
+            <div class="kanban-head"><span>In progress</span><span class="kanban-count">23</span></div>
+            <div class="kanban-card"><div class="kanban-card-t">Competitor counter brief</div><div class="kanban-meta"><span>Priya S.</span><span class="pill pill-bad">P0</span></div></div>
+            <div class="kanban-card"><div class="kanban-card-t">NCLEX interactive tool</div><div class="kanban-meta"><span>Eng team</span><span class="pill pill-warn">P1</span></div></div>
+            <div class="kanban-card"><div class="kanban-card-t">USMLE 10 mistakes article</div><div class="kanban-meta"><span>Rakesh M.</span><span class="pill pill-warn">P1</span></div></div>
+            <div class="kanban-card"><div class="kanban-card-t">CFA pillar page rewrite</div><div class="kanban-meta"><span>Marcus T.</span><span class="pill pill-muted">P2</span></div></div>
+          </div>
+          <div class="kanban-col">
+            <div class="kanban-head"><span>Review</span><span class="kanban-count">12</span></div>
+            <div class="kanban-card"><div class="kanban-card-t">10 mistakes USMLE</div><div class="kanban-meta"><span>Awaiting you</span><span class="pill pill-info">approval</span></div></div>
+            <div class="kanban-card"><div class="kanban-card-t">Bar exam video script</div><div class="kanban-meta"><span>Awaiting you</span><span class="pill pill-info">approval</span></div></div>
+            <div class="kanban-card"><div class="kanban-card-t">NCLEX tool · final QA</div><div class="kanban-meta"><span>QA team</span><span class="pill pill-muted">P1</span></div></div>
+          </div>
+          <div class="kanban-col">
+            <div class="kanban-head"><span>Shipped</span><span class="kanban-count">47</span></div>
+            <div class="kanban-card"><div class="kanban-card-t">CFA level 1 pillar</div><div class="kanban-meta"><span>Marcus T.</span><span class="pill pill-good">live</span></div></div>
+            <div class="kanban-card"><div class="kanban-card-t">Free trial form redesign</div><div class="kanban-meta"><span>Design</span><span class="pill pill-good">+24%</span></div></div>
+            <div class="kanban-card"><div class="kanban-card-t">Medical mnemonics post</div><div class="kanban-meta"><span>Priya S.</span><span class="pill pill-good">live</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i class="ti ti-gauge"></i>Team capacity · this sprint</div>
+          </div>
+          <div>
+            <div class="bar-row"><div class="bar-name">Priya S. · Sr SEO Specialist</div><div class="bar"><div class="bar-fill" style="width: 100%; background: var(--bad);"></div></div><div class="bar-val" style="color: var(--bad);">128%</div></div>
+            <div class="bar-row"><div class="bar-name">Rakesh M. · Content Lead</div><div class="bar"><div class="bar-fill" style="width: 100%; background: var(--bad);"></div></div><div class="bar-val" style="color: var(--bad);">122%</div></div>
+            <div class="bar-row"><div class="bar-name">Anu R. · Multimedia Producer</div><div class="bar"><div class="bar-fill" style="width: 100%; background: var(--bad);"></div></div><div class="bar-val" style="color: var(--bad);">121%</div></div>
+            <div class="bar-row"><div class="bar-name">Marcus T. · Content Strategist</div><div class="bar"><div class="bar-fill" style="width: 88%; background: var(--good);"></div></div><div class="bar-val" style="color: var(--good);">88%</div></div>
+            <div class="bar-row"><div class="bar-name">Divya K. · Content Writer</div><div class="bar"><div class="bar-fill" style="width: 64%; background: var(--warn);"></div></div><div class="bar-val" style="color: var(--warn);">64%</div></div>
+            <div class="bar-row"><div class="bar-name">Sameer A. · Content Writer</div><div class="bar"><div class="bar-fill" style="width: 52%; background: var(--warn);"></div></div><div class="bar-val" style="color: var(--warn);">52%</div></div>
+            <div class="bar-row"><div class="bar-name">Aisha N. · Content Writer</div><div class="bar"><div class="bar-fill" style="width: 48%; background: var(--warn);"></div></div><div class="bar-val" style="color: var(--warn);">48%</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i class="ti ti-users-group"></i>Department breakdown</div>
+          </div>
+          <div class="chart-wrap"><canvas id="deptChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-history"></i>Cycle time trend · last 12 sprints</div>
+        </div>
+        <div class="chart-wrap"><canvas id="cycleChart"></canvas></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new Chart(document.getElementById('deptChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['SEO (28)', 'Content (42)', 'Design (14)', 'Eng (12)', 'Analytics (8)'],
+        datasets: [{ data: [28, 42, 14, 12, 8], backgroundColor: ['#D4A574', '#60A5FA', '#C4B5FD', '#4ADE80', '#FBBF24'], borderColor: '#131826', borderWidth: 2 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '60%',
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, padding: 10, font: { size: 11 }, usePointStyle: true } } }
+      }
+    });
+
+    new Chart(document.getElementById('cycleChart'), {
+      type: 'line',
+      data: {
+        labels: ['S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23'],
+        datasets: [{ label: 'Avg cycle (days)', data: [4.1,4.0,3.8,3.6,3.4,3.2,3.0,2.9,2.7,2.6,2.5,2.4], borderColor: '#D4A574', backgroundColor: 'rgba(212,165,116,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+          y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { size: 11 }, callback: v => v + 'd' } }
+        }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
+

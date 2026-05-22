@@ -1,0 +1,231 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Content · UWorld</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.PAGE_META = { page: 'content', title: 'Content' };</script>
+</head>
+<body>
+
+<div class="app">
+  <main class="main">
+    <div class="page fade-in">
+
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">Production · Approval · Distribution</div>
+          <h1 class="page-title">Content <em>workflow</em></h1>
+          <p class="page-sub">AI drafts, scores, and routes content. Your team writes faster. You approve smarter. 71% of last month's content was AI-assisted.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn"><i class="ti ti-calendar"></i>Calendar</button>
+          <button class="btn btn-primary"><i class="ti ti-sparkles"></i>New brief</button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Awaiting approval</div><div class="metric-value">12</div><div class="metric-delta" style="color: var(--warn);"><i class="ti ti-clock"></i>4 time-sensitive</div></div>
+        <div class="metric"><div class="metric-label">In production</div><div class="metric-value">38</div><div class="metric-delta up"><i class="ti ti-trending-up"></i>on track</div></div>
+        <div class="metric"><div class="metric-label">Published · 30d</div><div class="metric-value">186</div><div class="metric-delta up"><i class="ti ti-trending-up"></i>+22%</div></div>
+        <div class="metric"><div class="metric-label">AI-assisted</div><div class="metric-value">71<span class="unit">%</span></div><div class="metric-delta" style="color: var(--accent);">+18pp YoY</div></div>
+      </div>
+
+      <div class="card" style="padding: 18px;">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-sparkles" style="color: var(--accent);"></i>AI content generator</div>
+          <span class="card-sub">Powered by Claude</span>
+        </div>
+        <div class="ai-bar">
+          <i class="ti ti-edit"></i>
+          <input type="text" placeholder="e.g. Write a comparison page for our MCAT prep vs CompetitorX" />
+          <button class="btn btn-primary btn-sm">Generate brief <i class="ti ti-arrow-right"></i></button>
+        </div>
+        <div class="chips">
+          <button class="chip">Suggest 10 topics from competitor gaps</button>
+          <button class="chip">Refresh underperforming pages</button>
+          <button class="chip">Meta titles for /pricing</button>
+          <button class="chip">FAQ schema for top 5 pages</button>
+          <button class="chip">Email nurture sequence — MCAT</button>
+          <button class="chip">YouTube descriptions</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-inbox"></i>Awaiting your approval</div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-sm">Filter</button>
+            <button class="btn btn-sm" onclick="showToast('Bulk approval armed', '8 items scoring above 90 will publish in next 5 minutes.')">Bulk approve >90</button>
+          </div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb"><i class="ti ti-article"></i></div>
+          <div class="queue-body">
+            <div class="queue-title">10 mistakes to avoid on USMLE step 1</div>
+            <div class="queue-meta">uworld-medical.com · blog · Priya S. · 1,840 words · drafted 4h ago</div>
+            <div class="queue-tags">
+              <span class="pill pill-purple">AI 94</span>
+              <span class="pill pill-good">SEO optimized</span>
+              <span class="pill pill-info">3 target KWs</span>
+              <span class="pill pill-muted">+8.2K visits/mo</span>
+            </div>
+          </div>
+          <div class="queue-actions">
+            <button class="btn btn-sm">Preview</button>
+            <button class="btn btn-sm btn-primary" onclick="showToast('Published', 'Article live at uworld-medical.com/usmle-mistakes')">Approve</button>
+          </div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb"><i class="ti ti-file-text"></i></div>
+          <div class="queue-body">
+            <div class="queue-title">CFA level 2 vs level 3: complete decision guide</div>
+            <div class="queue-meta">uworld-finance.com · pillar page · Marcus T. · 4,200 words · drafted 1d ago</div>
+            <div class="queue-tags">
+              <span class="pill pill-purple">AI 88</span>
+              <span class="pill pill-warn">SEO needs work</span>
+              <span class="pill pill-bad">trend: hot</span>
+              <span class="pill pill-muted">+14K visits/mo</span>
+            </div>
+          </div>
+          <div class="queue-actions">
+            <button class="btn btn-sm">AI fix</button>
+            <button class="btn btn-sm">Review</button>
+          </div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb"><i class="ti ti-tool"></i></div>
+          <div class="queue-body">
+            <div class="queue-title">Interactive NCLEX practice test (counter to CompetitorX)</div>
+            <div class="queue-meta">uworld-nursing.com · tool · Design team · 24h SLA · drafted 2h ago</div>
+            <div class="queue-tags">
+              <span class="pill pill-purple">AI 91</span>
+              <span class="pill pill-good">CTA strong</span>
+              <span class="pill pill-bad">competitor counter</span>
+              <span class="pill pill-muted">+22K visits/mo</span>
+            </div>
+          </div>
+          <div class="queue-actions">
+            <button class="btn btn-sm">Preview</button>
+            <button class="btn btn-sm btn-primary">Approve</button>
+          </div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb"><i class="ti ti-video"></i></div>
+          <div class="queue-body">
+            <div class="queue-title">Video script: "How to study for the bar exam in 90 days"</div>
+            <div class="queue-meta">uworld-legal.com · video · Anu R. · 8-min runtime · drafted 6h ago</div>
+            <div class="queue-tags">
+              <span class="pill pill-purple">AI 86</span>
+              <span class="pill pill-good">YouTube optimized</span>
+              <span class="pill pill-info">5 target KWs</span>
+            </div>
+          </div>
+          <div class="queue-actions">
+            <button class="btn btn-sm">Preview</button>
+            <button class="btn btn-sm btn-primary">Approve</button>
+          </div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb"><i class="ti ti-mail"></i></div>
+          <div class="queue-body">
+            <div class="queue-title">Email sequence: MCAT free trial nurture (7 emails)</div>
+            <div class="queue-meta">uworld-prep.com · email · Divya K. · 7,200 words · drafted 12h ago</div>
+            <div class="queue-tags">
+              <span class="pill pill-purple">AI 90</span>
+              <span class="pill pill-good">CTR predicted +24%</span>
+              <span class="pill pill-info">A/B variants ready</span>
+            </div>
+          </div>
+          <div class="queue-actions">
+            <button class="btn btn-sm">Preview</button>
+            <button class="btn btn-sm btn-primary">Approve</button>
+          </div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb"><i class="ti ti-photo"></i></div>
+          <div class="queue-body">
+            <div class="queue-title">Hero illustrations for /pricing redesign (3 variants)</div>
+            <div class="queue-meta">uworld-prep.com · design · Anu R. · drafted 18h ago</div>
+            <div class="queue-tags">
+              <span class="pill pill-purple">AI 87</span>
+              <span class="pill pill-good">brand aligned</span>
+              <span class="pill pill-info">3 variants</span>
+            </div>
+          </div>
+          <div class="queue-actions">
+            <button class="btn btn-sm">Preview</button>
+            <button class="btn btn-sm btn-primary">Approve</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i class="ti ti-calendar-event"></i>Publishing calendar · this week</div>
+          </div>
+          <table>
+            <tbody>
+              <tr><td><b>Mon</b></td><td>8 blog posts · 2 videos</td><td class="right"><span class="pill pill-good">on track</span></td></tr>
+              <tr><td><b>Tue</b></td><td>12 blog posts · 1 pillar</td><td class="right"><span class="pill pill-warn">2 pending</span></td></tr>
+              <tr><td><b>Wed</b></td><td>6 posts · 1 tool launch</td><td class="right"><span class="pill pill-good">on track</span></td></tr>
+              <tr><td><b>Thu</b></td><td>10 posts · email sequence</td><td class="right"><span class="pill pill-good">on track</span></td></tr>
+              <tr><td><b>Fri</b></td><td>14 posts · roundup digest</td><td class="right"><span class="pill pill-warn">approval needed</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i class="ti ti-chart-bar"></i>Output by team · 30d</div>
+          </div>
+          <div class="chart-wrap"><canvas id="outputChart"></canvas></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new Chart(document.getElementById('outputChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Medical', 'Nursing', 'Finance', 'Prep', 'Legal', 'Eng'],
+        datasets: [
+          { label: 'Blog', data: [42, 36, 28, 31, 18, 14], backgroundColor: '#D4A574' },
+          { label: 'Video', data: [12, 8, 6, 9, 4, 3], backgroundColor: '#60A5FA' },
+          { label: 'Tools', data: [4, 3, 2, 5, 1, 2], backgroundColor: '#C4B5FD' }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, padding: 12, font: { size: 11 }, usePointStyle: true } } },
+        scales: {
+          x: { stacked: true, grid: { display: false }, ticks: { font: { size: 11 } } },
+          y: { stacked: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { size: 11 } } }
+        }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Settings · UWorld</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.PAGE_META = { page: 'settings', title: 'Settings' };</script>
+<style>
+  /* ── Settings layout ── */
+  .settings-grid { display: grid; grid-template-columns: 220px 1fr; gap: 32px; }
+  .settings-nav { position: sticky; top: 88px; align-self: start; display: flex; flex-direction: column; gap: 2px; }
+  .settings-link { padding: 8px 12px; border-radius: 6px; font-size: 13px; color: var(--text-2); cursor: pointer; transition: all 0.15s; background: transparent; border: none; text-align: left; font-family: inherit; display: flex; align-items: center; gap: 8px; }
+  .settings-link:hover { background: var(--ink-2); color: var(--text); }
+  .settings-link.active { background: var(--ink-3); color: var(--text); }
+  .settings-link .nav-badge { font-size: 10px; background: var(--accent); color: #0A0E1A; padding: 1px 6px; border-radius: 8px; font-weight: 700; margin-left: auto; }
+  .settings-link .nav-badge.warn { background: var(--warn); }
+  .sec-hidden { display: none; }
+  .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-info { flex: 1; padding-right: 24px; }
+  .setting-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .setting-desc { font-size: 12px; color: var(--text-3); line-height: 1.5; max-width: 480px; }
+  .toggle { width: 36px; height: 20px; background: var(--ink-3); border-radius: 100px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .toggle::after { content: ''; position: absolute; width: 14px; height: 14px; background: var(--text-2); border-radius: 50%; top: 3px; left: 3px; transition: all 0.2s; }
+  .toggle.on { background: var(--accent); }
+  .toggle.on::after { background: var(--ink); left: 19px; }
+  .integration-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .integration-row:last-child { border-bottom: none; }
+  .integration-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--ink-3); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-2); flex-shrink: 0; }
+  .integration-body { flex: 1; }
+  .integration-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+  .integration-meta { font-size: 11px; color: var(--text-3); }
+
+  /* ── Sources section ── */
+  .sources-summary {
+    background: var(--ink-3);
+    border: 1px solid var(--line-2);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+  .src-stat { display: flex; align-items: center; gap: 8px; }
+  .src-stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .src-stat-num { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; line-height: 1; }
+  .src-stat-lbl { font-size: 12px; color: var(--text-2); }
+  .src-progress-wrap { flex: 1; min-width: 80px; display: flex; flex-direction: column; gap: 4px; }
+  .src-progress-bar { height: 4px; background: var(--ink-2); border-radius: 2px; overflow: hidden; }
+  .src-progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #4ADE80, #22C55E88); transition: width 0.6s ease; }
+  .src-progress-label { font-size: 11px; color: var(--text-3); }
+
+  .src-cat-head {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--text-3);
+    padding: 16px 0 8px; margin-top: 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .src-cat-head i { font-size: 14px; color: var(--text-3); }
+  .src-cat-count { font-size: 11px; color: var(--text-3); font-weight: 400; font-style: normal; text-transform: none; letter-spacing: 0; }
+  .src-cat-line { flex: 1; height: 1px; background: var(--line); }
+
+  .src-row {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 0; border-bottom: 1px solid var(--line);
+    transition: background 0.12s;
+  }
+  .src-row:last-child { border-bottom: none; }
+  .src-icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0; margin-top: 1px;
+  }
+  .src-body { flex: 1; min-width: 0; }
+  .src-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; color: var(--text); }
+  .src-desc { font-size: 12px; color: var(--text-3); line-height: 1.55; margin-bottom: 9px; max-width: 600px; }
+  .src-powers { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  .src-powers-label { font-size: 10px; color: var(--text-3); margin-right: 2px; }
+  .src-power {
+    font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 10px;
+    background: var(--ink-2); border: 1px solid var(--line-2); color: var(--text-3);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .src-right {
+    display: flex; flex-direction: column; align-items: flex-end;
+    gap: 6px; flex-shrink: 0; min-width: 110px;
+  }
+  .src-meta { font-size: 11px; color: var(--text-3); text-align: right; line-height: 1.4; }
+  .src-hint { font-size: 10px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; text-align: right; opacity: 0.7; }
+
+  /* Notification rows */
+  .notif-group-head { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); padding: 16px 0 4px; }
+
+  /* API key rows */
+  .key-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .key-row:last-child { border-bottom: none; }
+  .key-name { font-weight: 500; flex: 1; }
+  .key-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-3); background: var(--ink-3); padding: 3px 8px; border-radius: 4px; flex: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .key-meta { font-size: 11px; color: var(--text-3); width: 100px; text-align: right; }
+
+  /* Audit log rows */
+  .audit-row { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .audit-row:last-child { border-bottom: none; }
+  .audit-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+  .audit-body { flex: 1; }
+  .audit-action { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .audit-detail { font-size: 11px; color: var(--text-3); }
+  .audit-time { font-size: 11px; color: var(--text-3); white-space: nowrap; text-align: right; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <main class="main">
+    <div class="page fade-in">
+
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">Workspace · Integrations · AI</div>
+          <h1 class="page-title">Settings &amp; <em>preferences</em></h1>
+          <p class="page-sub">Configure workspace, data sources, AI behavior, team access, and billing.</p>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+
+        <!-- ── Sidebar nav ── -->
+        <nav class="settings-nav">
+          <button class="settings-link active" data-sec="general"><i class="ti ti-adjustments" style="font-size:15px;"></i>General</button>
+          <button class="settings-link" data-sec="ai"><i class="ti ti-sparkles" style="font-size:15px;"></i>AI preferences</button>
+          <button class="settings-link" data-sec="integrations"><i class="ti ti-plug-connected" style="font-size:15px;"></i>Integrations</button>
+          <button class="settings-link" data-sec="sources"><i class="ti ti-database" style="font-size:15px;color:var(--accent);"></i><span style="color:var(--accent);">Sources</span><span class="nav-badge">32</span></button>
+          <button class="settings-link" data-sec="team"><i class="ti ti-users" style="font-size:15px;"></i>Team &amp; access</button>
+          <button class="settings-link" data-sec="notifications"><i class="ti ti-bell" style="font-size:15px;"></i>Notifications</button>
+          <button class="settings-link" data-sec="billing"><i class="ti ti-credit-card" style="font-size:15px;"></i>Billing</button>
+          <button class="settings-link" data-sec="api"><i class="ti ti-key" style="font-size:15px;"></i>API keys</button>
+          <button class="settings-link" data-sec="audit"><i class="ti ti-history" style="font-size:15px;"></i>Audit log</button>
+        </nav>
+
+        <!-- ── Right content ── -->
+        <div>
+
+          <!-- ═══════════════════════════════════════════ GENERAL ══ -->
+          <div id="sec-general">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title"><i class="ti ti-adjustments"></i>General</div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">Workspace name</div>
+                  <div class="setting-desc">Used in headers, exports, and email digests.</div>
+                </div>
+                <input type="text" value="UWorld" style="background: var(--ink); border: 1px solid var(--line-2); border-radius: 6px; padding: 8px 12px; color: var(--text); font-family: inherit; font-size: 13px; width: 200px;" />
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">Default timezone</div>
+                  <div class="setting-desc">Used for scheduling, reports, and AI briefings.</div>
+                </div>
+                <select style="background: var(--ink); border: 1px solid var(--line-2); border-radius: 6px; padding: 8px 12px; color: var(--text); font-family: inherit; font-size: 13px;">
+                  <option>Asia/Kolkata (IST)</option>
+                  <option>America/New_York (EST)</option>
+                  <option>Europe/London (GMT)</option>
+                </select>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">Theme</div>
+                  <div class="setting-desc">Dark theme is recommended for long sessions.</div>
+                </div>
+                <div class="seg-tabs">
+                  <button class="seg-tab on">Dark</button>
+                  <button class="seg-tab">Light</button>
+                  <button class="seg-tab">System</button>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">Date format</div>
+                  <div class="setting-desc">How dates appear throughout the dashboard.</div>
+                </div>
+                <div class="seg-tabs">
+                  <button class="seg-tab on">MMM DD</button>
+                  <button class="seg-tab">DD/MM</button>
+                  <button class="seg-tab">MM/DD</button>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">Default currency</div>
+                  <div class="setting-desc">Currency shown in revenue, traffic value, and ad metrics.</div>
+                </div>
+                <select style="background: var(--ink); border: 1px solid var(--line-2); border-radius: 6px; padding: 8px 12px; color: var(--text); font-family: inherit; font-size: 13px;">
+                  <option>USD ($)</option>
+                  <option>INR (₹)</option>
+                  <option>EUR (€)</option>
+                  <option>GBP (£)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════ AI PREFS ══ -->
+          <div id="sec-ai" class="sec-hidden">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title"><i class="ti ti-sparkles" style="color: var(--accent);"></i>AI preferences</div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">Auto-approve content scoring &gt; 90</div>
+                  <div class="setting-desc">Publish high-confidence AI content without your review. You can override at any time.</div>
+                </div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">Daily AI briefing at 9 AM</div>
+                  <div class="setting-desc">Get the 3-most-important items in your inbox every morning.</div>
+                </div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">Voice briefings</div>
+                  <div class="setting-desc">Listen to briefings on your commute. Currently 6-minute average.</div>
+                </div>
+                <div class="toggle" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">Competitor alerts</div>
+                  <div class="setting-desc">Real-time notifications when tracked competitors ship pages or move rankings.</div>
+                </div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">AI model</div>
+                  <div class="setting-desc">Claude Opus 4 is the default. Haiku is faster for bulk operations like meta-tag rewrites.</div>
+                </div>
+                <div class="seg-tabs">
+                  <button class="seg-tab on">Opus 4</button>
+                  <button class="seg-tab">Sonnet 4</button>
+                  <button class="seg-tab">Haiku</button>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">AI agency level</div>
+                  <div class="setting-desc">How much can AI act without confirmation? Higher = faster, less oversight.</div>
+                </div>
+                <div class="seg-tabs">
+                  <button class="seg-tab">Suggest only</button>
+                  <button class="seg-tab on">Draft &amp; queue</button>
+                  <button class="seg-tab">Auto-execute</button>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">AI tone of voice</div>
+                  <div class="setting-desc">Applied globally to all AI-generated content briefs and copy suggestions.</div>
+                </div>
+                <select style="background: var(--ink); border: 1px solid var(--line-2); border-radius: 6px; padding: 8px 12px; color: var(--text); font-family: inherit; font-size: 13px;">
+                  <option>Professional · authoritative</option>
+                  <option>Friendly · approachable</option>
+                  <option>Academic · precise</option>
+                  <option>Conversational</option>
+                </select>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-name">Brand context training</div>
+                  <div class="setting-desc">AI has been trained on 284 UWorld documents. Last updated 3 days ago.</div>
+                </div>
+                <button class="btn btn-sm"><i class="ti ti-upload"></i>Update training</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════ INTEGRATIONS ══ -->
+          <div id="sec-integrations" class="sec-hidden">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title"><i class="ti ti-plug-connected"></i>Integrations</div>
+                <button class="btn btn-sm" onclick="document.querySelector('[data-sec=sources]').click()"><i class="ti ti-database"></i>All 32 sources →</button>
+              </div>
+              <div class="integration-row">
+                <div class="integration-icon" style="background: rgba(52,168,83,0.1); color: #34A853;"><i class="ti ti-brand-google"></i></div>
+                <div class="integration-body">
+                  <div class="integration-name">Google Search Console</div>
+                  <div class="integration-meta">Connected · syncing 32 sites · last sync 4m ago</div>
+                </div>
+                <span class="pill pill-good">live</span>
+                <button class="btn btn-sm btn-ghost"><i class="ti ti-settings"></i></button>
+              </div>
+              <div class="integration-row">
+                <div class="integration-icon" style="background: rgba(66,133,244,0.1); color: #4285F4;"><i class="ti ti-chart-line"></i></div>
+                <div class="integration-body">
+                  <div class="integration-name">Google Analytics 4</div>
+                  <div class="integration-meta">Connected · 32 properties · last sync 2m ago</div>
+                </div>
+                <span class="pill pill-good">live</span>
+                <button class="btn btn-sm btn-ghost"><i class="ti ti-settings"></i></button>
+              </div>
+              <div class="integration-row">
+                <div class="integration-icon" style="background: rgba(255,115,81,0.1); color: #FF7351;"><i class="ti ti-chart-area-line"></i></div>
+                <div class="integration-body">
+                  <div class="integration-name">Ahrefs</div>
+                  <div class="integration-meta">Connected · keywords + backlinks · last sync 12m ago</div>
+                </div>
+                <span class="pill pill-good">live</span>
+                <button class="btn btn-sm btn-ghost"><i class="ti ti-settings"></i></button>
+              </div>
+              <div class="integration-row">
+                <div class="integration-icon" style="background: rgba(99,91,255,0.1); color: #635BFF;"><i class="ti ti-brand-stripe"></i></div>
+                <div class="integration-body">
+                  <div class="integration-name">Stripe</div>
+                  <div class="integration-meta">Connected · revenue + subscriptions · last sync 6m ago</div>
+                </div>
+                <span class="pill pill-good">live</span>
+                <button class="btn btn-sm btn-ghost"><i class="ti ti-settings"></i></button>
+              </div>
+              <div class="integration-row">
+                <div class="integration-icon" style="background: rgba(212,165,116,0.1); color: var(--accent);"><i class="ti ti-brand-slack"></i></div>
+                <div class="integration-body">
+                  <div class="integration-name">Slack</div>
+                  <div class="integration-meta">Connected · #alerts, #ai-briefings · 14 channels</div>
+                </div>
+                <span class="pill pill-good">live</span>
+                <button class="btn btn-sm btn-ghost"><i class="ti ti-settings"></i></button>
+              </div>
+              <div class="integration-row">
+                <div class="integration-icon" style="background: rgba(33,117,155,0.1); color: #21759B;"><i class="ti ti-brand-wordpress"></i></div>
+                <div class="integration-body">
+                  <div class="integration-name">WordPress</div>
+                  <div class="integration-meta">28/32 sites connected · 4 sites need re-auth</div>
+                </div>
+                <span class="pill pill-warn">re-auth</span>
+                <button class="btn btn-sm btn-primary" onclick="showToast('Re-auth started', 'OAuth flow opened for 4 WordPress sites. Complete in new tab.')">Fix now</button>
+              </div>
+              <div class="integration-row">
+                <div class="integration-icon" style="background: rgba(248,113,113,0.1); color: var(--bad);"><i class="ti ti-flame"></i></div>
+                <div class="integration-body">
+                  <div class="integration-name">Hotjar</div>
+                  <div class="integration-meta">Connected · 847 pages tracked · last sync 6m ago</div>
+                </div>
+                <span class="pill pill-good">live</span>
+                <button class="btn btn-sm btn-ghost"><i class="ti ti-settings"></i></button>
+              </div>
+              <div class="integration-row">
+                <div class="integration-icon"><i class="ti ti-mail"></i></div>
+                <div class="integration-body">
+                  <div class="integration-name">HubSpot</div>
+                  <div class="integration-meta">Not connected · sync leads, email metrics, CRM</div>
+                </div>
+                <button class="btn btn-sm" onclick="showToast('HubSpot', 'Opening OAuth flow to connect HubSpot CRM...')">Connect</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════ SOURCES ══ -->
+          <div id="sec-sources" class="sec-hidden">
+
+            <!-- Summary strip -->
+            <div class="sources-summary">
+              <div class="src-stat">
+                <div class="src-stat-dot" style="background: var(--good);"></div>
+                <div class="src-stat-num" style="color: var(--good);" id="srcLiveNum">10</div>
+                <div class="src-stat-lbl">live</div>
+              </div>
+              <div class="src-stat">
+                <div class="src-stat-dot" style="background: var(--warn);"></div>
+                <div class="src-stat-num" style="color: var(--warn);" id="srcWarnNum">2</div>
+                <div class="src-stat-lbl">need attention</div>
+              </div>
+              <div class="src-stat">
+                <div class="src-stat-dot" style="background: var(--text-3);"></div>
+                <div class="src-stat-num" style="color: var(--text-3);" id="srcOffNum">20</div>
+                <div class="src-stat-lbl">not connected</div>
+              </div>
+              <div class="src-progress-wrap">
+                <div class="src-progress-bar">
+                  <div class="src-progress-fill" id="srcProgressFill" style="width: 31%;"></div>
+                </div>
+                <div class="src-progress-label" id="srcProgressLabel">10 / 32 sources active (31%)</div>
+              </div>
+              <div style="margin-left:auto; display:flex; gap:8px; flex-shrink:0;">
+                <button class="btn btn-sm" onclick="showToast('Syncing all sources', 'Refreshing data from 10 connected sources...')"><i class="ti ti-refresh"></i>Sync all</button>
+                <button class="btn btn-sm btn-primary" onclick="showToast('Add source', 'Browse the full connector marketplace.')"><i class="ti ti-plus"></i>Add source</button>
+              </div>
+            </div>
+
+            <!-- Sources list (JS-rendered) -->
+            <div class="card" style="padding: 4px 20px 20px;">
+              <div id="sourcesGrid"></div>
+            </div>
+
+          </div><!-- /sec-sources -->
+
+          <!-- ═══════════════════════════════════════════ TEAM ══ -->
+          <div id="sec-team" class="sec-hidden">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title"><i class="ti ti-users"></i>Team &amp; access</div>
+                <button class="btn btn-sm btn-primary"><i class="ti ti-plus"></i>Invite</button>
+              </div>
+              <table>
+                <thead><tr><th>Member</th><th>Role</th><th>Sites access</th><th>Last active</th><th class="right"></th></tr></thead>
+                <tbody>
+                  <tr><td><div style="display:flex;gap:10px;align-items:center;"><div class="avatar">R</div><div><div style="font-weight:500;">Ravi Kumar</div><div style="font-size:11px;color:var(--text-3);">ravi@uworld.com</div></div></div></td><td><span class="pill pill-accent">Owner</span></td><td style="font-size:12px;color:var(--text-3);">All 32 sites</td><td style="color:var(--text-3);font-size:12px;">Now</td><td class="right"></td></tr>
+                  <tr><td><div style="display:flex;gap:10px;align-items:center;"><div class="avatar">PS</div><div><div style="font-weight:500;">Priya S.</div><div style="font-size:11px;color:var(--text-3);">priya@uworld.com</div></div></div></td><td><span class="pill pill-info">Admin</span></td><td style="font-size:12px;color:var(--text-3);">All sites</td><td style="color:var(--text-3);font-size:12px;">2m ago</td><td class="right"><button class="btn btn-sm btn-ghost"><i class="ti ti-dots"></i></button></td></tr>
+                  <tr><td><div style="display:flex;gap:10px;align-items:center;"><div class="avatar">MT</div><div><div style="font-weight:500;">Marcus T.</div><div style="font-size:11px;color:var(--text-3);">marcus@uworld.com</div></div></div></td><td><span class="pill pill-muted">Editor</span></td><td style="font-size:12px;color:var(--text-3);">Medical, Finance</td><td style="color:var(--text-3);font-size:12px;">14m ago</td><td class="right"><button class="btn btn-sm btn-ghost"><i class="ti ti-dots"></i></button></td></tr>
+                  <tr><td><div style="display:flex;gap:10px;align-items:center;"><div class="avatar">AR</div><div><div style="font-weight:500;">Anu R.</div><div style="font-size:11px;color:var(--text-3);">anu@uworld.com</div></div></div></td><td><span class="pill pill-muted">Editor</span></td><td style="font-size:12px;color:var(--text-3);">Nursing, Legal</td><td style="color:var(--text-3);font-size:12px;">1h ago</td><td class="right"><button class="btn btn-sm btn-ghost"><i class="ti ti-dots"></i></button></td></tr>
+                  <tr><td colspan="5" style="color:var(--text-3);font-size:12px;text-align:center;padding:16px;">+ 100 more members · <a href="team.html" style="color:var(--accent);">Manage all in Team →</a></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-head"><div class="card-title"><i class="ti ti-shield-lock"></i>Roles &amp; permissions</div></div>
+              <div class="setting-row">
+                <div class="setting-info"><div class="setting-name">Editors can publish</div><div class="setting-desc">Allow Editor-role members to publish content without Owner/Admin approval.</div></div>
+                <div class="toggle" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><div class="setting-name">Editors can view revenue data</div><div class="setting-desc">Show Stripe revenue and conversion metrics to Editor-level users.</div></div>
+                <div class="toggle" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><div class="setting-name">AI actions require approval</div><div class="setting-desc">Any AI-initiated action (publish, brief, A/B launch) needs at least one human approval.</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════ NOTIFICATIONS ══ -->
+          <div id="sec-notifications" class="sec-hidden">
+            <div class="card">
+              <div class="card-head"><div class="card-title"><i class="ti ti-bell"></i>Notification rules</div>
+                <div class="seg-tabs">
+                  <button class="seg-tab on">Email</button>
+                  <button class="seg-tab">Slack</button>
+                  <button class="seg-tab">In-app</button>
+                </div>
+              </div>
+              <div class="notif-group-head">Rankings &amp; SEO</div>
+              <div class="setting-row"><div class="setting-info"><div class="setting-name">Keyword drops more than 3 positions</div><div class="setting-desc">Alert immediately when any tracked keyword falls 3+ spots.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="setting-row"><div class="setting-info"><div class="setting-name">New page enters top 10</div><div class="setting-desc">Notify when any of your pages reach the first page.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="setting-row"><div class="setting-info"><div class="setting-name">Core Web Vitals fail threshold</div><div class="setting-desc">LCP &gt; 4s or CLS &gt; 0.25 on any indexed page.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="notif-group-head">Competitors</div>
+              <div class="setting-row"><div class="setting-info"><div class="setting-name">Competitor ships new page</div><div class="setting-desc">Alert within 2 hours when a tracked competitor publishes a new URL.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="setting-row"><div class="setting-info"><div class="setting-name">Competitor steals a top-3 keyword</div><div class="setting-desc">When a competitor overtakes our position 1–3 for a tracked keyword.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="notif-group-head">Content &amp; Conversion</div>
+              <div class="setting-row"><div class="setting-info"><div class="setting-name">Content queue reaches 15+ items</div><div class="setting-desc">Remind when approval queue is building up.</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+              <div class="setting-row"><div class="setting-info"><div class="setting-name">A/B test reaches statistical significance</div><div class="setting-desc">Call the winner automatically when p &lt; 0.05 and 1,000+ conversions.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="setting-row"><div class="setting-info"><div class="setting-name">Conversion rate drops 10%+ week-over-week</div><div class="setting-desc">Anomaly detection alert for significant conversion drops.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="notif-group-head">Revenue &amp; Ads</div>
+              <div class="setting-row"><div class="setting-info"><div class="setting-name">Banner CTR drops below 0.1%</div><div class="setting-desc">Flag underperforming ad creatives for refresh.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="setting-row"><div class="setting-info"><div class="setting-name">Revenue anomaly detected</div><div class="setting-desc">AI flags unexpected drops or spikes in daily revenue vs rolling average.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════ BILLING ══ -->
+          <div id="sec-billing" class="sec-hidden">
+            <div class="card">
+              <div class="card-head"><div class="card-title"><i class="ti ti-credit-card"></i>Billing</div></div>
+              <div class="setting-row">
+                <div class="setting-info"><div class="setting-name">Current plan · Enterprise</div><div class="setting-desc">Unlimited sites, 104 seats, dedicated success manager, custom AI training.</div></div>
+                <button class="btn btn-sm">Manage plan</button>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><div class="setting-name">Monthly spend</div><div class="setting-desc">Billed annually · next renewal Mar 2027.</div></div>
+                <div style="font-family: 'Instrument Serif', serif; font-size: 28px;">$24,800<span style="font-size:14px;color:var(--text-3);">/mo</span></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><div class="setting-name">Payment method</div><div class="setting-desc">Wire transfer · NET 30 terms.</div></div>
+                <button class="btn btn-sm">Update</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div class="card-title"><i class="ti ti-file-invoice"></i>Recent invoices</div></div>
+              <table>
+                <thead><tr><th>Period</th><th>Amount</th><th class="right">Status</th><th class="right"></th></tr></thead>
+                <tbody>
+                  <tr><td>May 2026</td><td class="num">$24,800</td><td class="right"><span class="pill pill-good">paid</span></td><td class="right"><button class="btn btn-sm btn-ghost"><i class="ti ti-download"></i></button></td></tr>
+                  <tr><td>Apr 2026</td><td class="num">$24,800</td><td class="right"><span class="pill pill-good">paid</span></td><td class="right"><button class="btn btn-sm btn-ghost"><i class="ti ti-download"></i></button></td></tr>
+                  <tr><td>Mar 2026</td><td class="num">$24,800</td><td class="right"><span class="pill pill-good">paid</span></td><td class="right"><button class="btn btn-sm btn-ghost"><i class="ti ti-download"></i></button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════ API KEYS ══ -->
+          <div id="sec-api" class="sec-hidden">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title"><i class="ti ti-key"></i>API keys</div>
+                <button class="btn btn-sm btn-primary" onclick="showToast('New API key', 'Key generated: uw_live_••••••••••••••••••••••••. Copy and store it safely.')"><i class="ti ti-plus"></i>New key</button>
+              </div>
+              <div class="key-row">
+                <div class="key-name">Production</div>
+                <div class="key-val">uw_live_••••••••••••••••••••••••K8x2</div>
+                <div class="key-meta">Created Jan 12</div>
+                <div class="key-meta">Last used 4m ago</div>
+                <span class="pill pill-good">active</span>
+                <button class="btn btn-sm btn-ghost" onclick="showToast('Copied', 'API key copied to clipboard.')"><i class="ti ti-copy"></i></button>
+                <button class="btn btn-sm btn-ghost" style="color:var(--bad);" onclick="showToast('Key revoked', 'Production key has been revoked. All requests using it will fail immediately.')"><i class="ti ti-trash"></i></button>
+              </div>
+              <div class="key-row">
+                <div class="key-name">Staging</div>
+                <div class="key-val">uw_test_••••••••••••••••••••••••m3Pq</div>
+                <div class="key-meta">Created Feb 3</div>
+                <div class="key-meta">Last used 2d ago</div>
+                <span class="pill pill-good">active</span>
+                <button class="btn btn-sm btn-ghost" onclick="showToast('Copied', 'API key copied to clipboard.')"><i class="ti ti-copy"></i></button>
+                <button class="btn btn-sm btn-ghost" style="color:var(--bad);"><i class="ti ti-trash"></i></button>
+              </div>
+              <div class="key-row">
+                <div class="key-name">Data export (read-only)</div>
+                <div class="key-val">uw_ro_••••••••••••••••••••••••nV7w</div>
+                <div class="key-meta">Created Mar 22</div>
+                <div class="key-meta">Last used 12h ago</div>
+                <span class="pill pill-muted">read-only</span>
+                <button class="btn btn-sm btn-ghost" onclick="showToast('Copied', 'API key copied to clipboard.')"><i class="ti ti-copy"></i></button>
+                <button class="btn btn-sm btn-ghost" style="color:var(--bad);"><i class="ti ti-trash"></i></button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div class="card-title"><i class="ti ti-webhook"></i>Webhooks</div><button class="btn btn-sm"><i class="ti ti-plus"></i>Add endpoint</button></div>
+              <div class="setting-row">
+                <div class="setting-info"><div class="setting-name" style="font-family:'JetBrains Mono',monospace;font-size:12px;">https://hooks.zapier.com/hooks/catch/...</div><div class="setting-desc">Triggers: content.approved · test.completed · alert.competitor</div></div>
+                <span class="pill pill-good">active</span>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><div class="setting-name" style="font-family:'JetBrains Mono',monospace;font-size:12px;">https://api.uworld.com/internal/webhooks</div><div class="setting-desc">Triggers: ranking.drop · conversion.anomaly</div></div>
+                <span class="pill pill-good">active</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════ AUDIT LOG ══ -->
+          <div id="sec-audit" class="sec-hidden">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title"><i class="ti ti-history"></i>Audit log</div>
+                <button class="btn btn-sm"><i class="ti ti-download"></i>Export CSV</button>
+              </div>
+              <div id="auditLog"></div>
+            </div>
+          </div>
+
+        </div><!-- /right content -->
+      </div><!-- /settings-grid -->
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+// ── Tab switching ──────────────────────────────────────────────
+document.querySelectorAll('[data-sec]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.settings-link').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const target = 'sec-' + btn.dataset.sec;
+    document.querySelectorAll('[id^="sec-"]').forEach(sec => {
+      sec.classList.toggle('sec-hidden', sec.id !== target);
+    });
+  });
+});
+
+// ── Sources data ───────────────────────────────────────────────
+const SOURCES = [
+  // Analytics & Traffic
+  { id:'ga4', cat:'Analytics & Traffic', catIcon:'ti-chart-line', name:'Google Analytics 4', desc:'Sessions, users, pageviews, revenue, device breakdown, geography, cohort retention, funnel analysis, and acquisition channels across all 32 properties.', icon:'ti-brand-google-analytics', iconBg:'rgba(66,133,244,0.12)', iconColor:'#4285F4', powers:['Overview','Analytics','Conversion','Site detail','Page detail'], status:'live', meta:'32 properties · synced 2m ago', hint:'OAuth · free' },
+  { id:'gsc', cat:'Analytics & Traffic', catIcon:'ti-chart-line', name:'Google Search Console', desc:'Keyword impressions, clicks, CTR, average position, index coverage, crawl errors, sitemaps, and CrUX Core Web Vitals for all sites and pages.', icon:'ti-brand-google', iconBg:'rgba(52,168,83,0.12)', iconColor:'#34A853', powers:['SEO','Overview','Sites tree','Page detail','Research'], status:'live', meta:'32 sites · synced 4m ago', hint:'OAuth · free' },
+  { id:'stripe', cat:'Analytics & Traffic', catIcon:'ti-chart-line', name:'Stripe', desc:'Subscription MRR, churn rate, trial-to-paid conversion, LTV, revenue by product and vertical, failed payment rate, and refund analysis.', icon:'ti-brand-stripe', iconBg:'rgba(99,91,255,0.12)', iconColor:'#635BFF', powers:['Analytics','Overview','Site detail'], status:'live', meta:'$2.4M/mo · synced 6m ago', hint:'API key · paid plans' },
+
+  // SEO Intelligence
+  { id:'ahrefs', cat:'SEO Intelligence', catIcon:'ti-target-arrow', name:'Ahrefs', desc:'Keyword rankings, backlink profiles, domain authority, referring domain trends, content gap analysis, competitor keyword data, and broken link opportunities.', icon:'ti-chart-area-line', iconBg:'rgba(255,115,81,0.12)', iconColor:'#FF7351', powers:['SEO','Competitors','Page detail','Site detail','Research'], status:'live', meta:'14,820 KWs · synced 12m ago', hint:'API key · $399/mo' },
+  { id:'semrush', cat:'SEO Intelligence', catIcon:'ti-target-arrow', name:'SEMrush', desc:'Keyword research, position tracking, on-page SEO checker, topic research, and competitive intelligence. Pairs with Ahrefs for double-verification of ranking data.', icon:'ti-eye', iconBg:'rgba(255,161,22,0.12)', iconColor:'#FFA116', powers:['SEO','Competitors','Research'], status:'off', meta:'Not connected', hint:'API key · $129/mo' },
+  { id:'moz', cat:'SEO Intelligence', catIcon:'ti-target-arrow', name:'Moz Pro', desc:'Domain Authority (DA) and Page Authority scores, spam score, link explorer for outreach targeting, and local SEO pack data for geo-specific landing pages.', icon:'ti-link', iconBg:'rgba(0,117,255,0.12)', iconColor:'#0075FF', powers:['SEO','Competitors'], status:'off', meta:'Not connected', hint:'API key · $99/mo' },
+  { id:'pagespeed', cat:'SEO Intelligence', catIcon:'ti-target-arrow', name:'Google PageSpeed Insights', desc:'Real-world Core Web Vitals (LCP, FID/INP, CLS) from CrUX field data and Lighthouse lab scores. Auto-sweeps all indexed pages weekly — no key needed.', icon:'ti-gauge', iconBg:'rgba(251,191,36,0.12)', iconColor:'#FBBF24', powers:['SEO','Page detail'], status:'live', meta:'Auto-run · weekly sweep', hint:'No key needed · built-in' },
+  { id:'dataforseo', cat:'SEO Intelligence', catIcon:'ti-target-arrow', name:'DataForSEO / SerpAPI', desc:'Live SERP snapshots, AI Overview presence detection, People Also Ask extraction, featured snippet tracking, local pack results, and related searches at scale.', icon:'ti-search', iconBg:'rgba(74,222,128,0.12)', iconColor:'#4ADE80', powers:['Page detail','Research','SEO'], status:'live', meta:'SERP + PAA · synced 8m ago', hint:'API key · from $50/mo' },
+
+  // Competitor Tracking
+  { id:'similarweb', cat:'Competitor Tracking', catIcon:'ti-radar', name:'SimilarWeb', desc:'Competitor estimated traffic volumes, traffic source breakdown, top organic and paid pages, audience demographics, engagement metrics, and ad spend signals.', icon:'ti-radar', iconBg:'rgba(0,161,214,0.12)', iconColor:'#00A1D6', powers:['Competitors'], status:'off', meta:'Not connected', hint:'API key · $167/mo' },
+  { id:'spyfu', cat:'Competitor Tracking', catIcon:'ti-radar', name:'SpyFu', desc:'Competitor paid search history going back to 2006, ad copy archive, PPC keyword buy recommendations, and organic rank history for competitor domains.', icon:'ti-spy', iconBg:'rgba(196,181,253,0.12)', iconColor:'#C4B5FD', powers:['Competitors'], status:'off', meta:'Not connected', hint:'API key · $39/mo' },
+  { id:'crawler', cat:'Competitor Tracking', catIcon:'ti-radar', name:'Built-in Competitor Crawler', desc:'UWorld\'s own page-change detection engine. Crawls 8 tracked competitor domains daily, alerts within 2h when new pages go live or significant content changes appear.', icon:'ti-robot', iconBg:'rgba(212,165,116,0.12)', iconColor:'#D4A574', powers:['Competitors','Overview'], status:'live', meta:'8 domains · last run 1h ago', hint:'Built-in · no key needed' },
+
+  // Conversion & UX
+  { id:'hotjar', cat:'Conversion & UX', catIcon:'ti-flame', name:'Hotjar', desc:'Click heatmaps, scroll depth maps, rage-click detection, session recordings, and conversion funnel analysis. Used to generate AI redesign briefs and detect abandonment.', icon:'ti-flame', iconBg:'rgba(248,113,113,0.12)', iconColor:'#F87171', powers:['Conversion','Page detail'], status:'live', meta:'847 pages tracked · synced 6m ago', hint:'JS snippet · from $39/mo' },
+  { id:'clarity', cat:'Conversion & UX', catIcon:'ti-flame', name:'Microsoft Clarity', desc:'Free session recordings, heatmaps, JavaScript error detection, and dead-click analysis. Ideal as a complementary tool for lower-traffic pages where Hotjar isn\'t tracking.', icon:'ti-brand-windows', iconBg:'rgba(0,164,239,0.12)', iconColor:'#00A4EF', powers:['Conversion','Page detail'], status:'off', meta:'Not connected', hint:'JS snippet · free forever' },
+  { id:'vwo', cat:'Conversion & UX', catIcon:'ti-flame', name:'VWO (Visual Website Optimizer)', desc:'A/B testing, multivariate tests, split URL tests, heatmaps, session recordings, and push notifications. Full-stack experimentation for all UWorld pricing and landing pages.', icon:'ti-test-pipe', iconBg:'rgba(74,222,128,0.12)', iconColor:'#4ADE80', powers:['Conversion'], status:'off', meta:'Not connected', hint:'JS snippet · $199/mo' },
+  { id:'optimizely', cat:'Conversion & UX', catIcon:'ti-flame', name:'Optimizely', desc:'Enterprise-grade experimentation with feature flags, server-side A/B tests, personalization engine, and advanced audience segmentation for high-traffic conversion programs.', icon:'ti-flask', iconBg:'rgba(96,165,250,0.12)', iconColor:'#60A5FA', powers:['Conversion'], status:'off', meta:'Not connected', hint:'SDK install · custom pricing' },
+
+  // CMS & Publishing
+  { id:'wordpress', cat:'CMS & Publishing', catIcon:'ti-edit', name:'WordPress (REST API)', desc:'Publish AI-approved content directly to 32 sites, sync live page metadata, update meta titles and descriptions in bulk, and monitor post status and indexation.', icon:'ti-brand-wordpress', iconBg:'rgba(33,117,155,0.12)', iconColor:'#21759B', powers:['Content','Sites tree','Page detail'], status:'reauth', meta:'28/32 sites · 4 need re-auth', hint:'Application password · per site' },
+  { id:'contentful', cat:'CMS & Publishing', catIcon:'ti-edit', name:'Contentful', desc:'Headless CMS powering uworld-legal.com. Sync structured content entries, asset management, locale variants, and publish workflow stages into the command center.', icon:'ti-database', iconBg:'rgba(255,176,33,0.12)', iconColor:'#FFB021', powers:['Content','Sites tree'], status:'off', meta:'Not connected', hint:'API key · from $300/mo' },
+  { id:'youtube', cat:'CMS & Publishing', catIcon:'ti-edit', name:'YouTube Studio', desc:'Video view counts, watch time, subscriber impact, CTR on thumbnails, top-performing videos, comment sentiment, and search query data for UWorld channels.', icon:'ti-brand-youtube', iconBg:'rgba(255,0,0,0.12)', iconColor:'#FF0000', powers:['Content','Analytics'], status:'off', meta:'Not connected', hint:'OAuth · free' },
+
+  // Marketing & CRM
+  { id:'hubspot', cat:'Marketing & CRM', catIcon:'ti-mail', name:'HubSpot', desc:'Lead capture analytics, contact lifecycle stage tracking, email campaign open/click metrics, CRM pipeline health, marketing attribution, and form conversion rates.', icon:'ti-mail', iconBg:'rgba(255,122,89,0.12)', iconColor:'#FF7A59', powers:['Content','Analytics'], status:'off', meta:'Not connected', hint:'OAuth · free tier available' },
+  { id:'klaviyo', cat:'Marketing & CRM', catIcon:'ti-mail', name:'Klaviyo', desc:'Email automation flow performance, SMS campaign metrics, list health (growth rate, unsubscribes, deliverability), and revenue-per-email for trial nurture sequences.', icon:'ti-send', iconBg:'rgba(14,165,233,0.12)', iconColor:'#0EA5E9', powers:['Content'], status:'off', meta:'Not connected', hint:'API key · from $20/mo' },
+  { id:'mailchimp', cat:'Marketing & CRM', catIcon:'ti-mail', name:'Mailchimp', desc:'Bulk campaign send metrics, audience segmentation performance, A/B subject line testing results, and deliverability rate trends across all UWorld email lists.', icon:'ti-mail-forward', iconBg:'rgba(255,226,0,0.12)', iconColor:'#FFE200', powers:['Content'], status:'off', meta:'Not connected', hint:'API key · free to $299/mo' },
+
+  // Advertising
+  { id:'google-ads', cat:'Advertising', catIcon:'ti-ad-2', name:'Google Ads', desc:'Paid search campaign spend, impressions, clicks, CPC, ROAS, Quality Score, and display network banner performance metrics across all UWorld ad accounts.', icon:'ti-ad-2', iconBg:'rgba(66,133,244,0.12)', iconColor:'#4285F4', powers:['Ad Banners','Analytics'], status:'reauth', meta:'Re-auth required · expired token', hint:'OAuth · spend-based billing' },
+  { id:'meta-ads', cat:'Advertising', catIcon:'ti-ad-2', name:'Meta Ads (Facebook/Instagram)', desc:'Facebook and Instagram campaign performance, creative-level breakdown, frequency and reach, audience segment insights, and cross-device attribution.', icon:'ti-brand-meta', iconBg:'rgba(24,119,242,0.12)', iconColor:'#1877F2', powers:['Ad Banners','Analytics'], status:'off', meta:'Not connected', hint:'OAuth · spend-based billing' },
+  { id:'dv360', cat:'Advertising', catIcon:'ti-ad-2', name:'Google DV360', desc:'Programmatic display and video campaign management, audience segment performance, viewability reporting, brand safety controls, and CPM optimization data.', icon:'ti-device-tv', iconBg:'rgba(52,168,83,0.12)', iconColor:'#34A853', powers:['Ad Banners'], status:'off', meta:'Not connected', hint:'Service account · enterprise' },
+
+  // AI Engine
+  { id:'claude', cat:'AI Engine', catIcon:'ti-sparkles', name:'Anthropic Claude (Opus 4)', desc:'Core intelligence engine powering every AI feature: daily briefings, content briefs, competitor counter-strategies, page wireframes, SEO action plans, and voice summaries.', icon:'ti-sparkles', iconBg:'rgba(212,165,116,0.12)', iconColor:'#D4A574', powers:['All pages'], status:'live', meta:'Opus 4 · 200K ctx · live', hint:'Built-in · managed by UWorld' },
+  { id:'openai', cat:'AI Engine', catIcon:'ti-sparkles', name:'OpenAI GPT-4o', desc:'Optional secondary AI model for content generation. Can be activated per team or vertical for writers who prefer GPT-4o style, with full brand context injection.', icon:'ti-brain', iconBg:'rgba(16,163,127,0.12)', iconColor:'#10A37F', powers:['Content'], status:'off', meta:'Not connected', hint:'API key · $0.01–0.03/1K tokens' },
+
+  // Collaboration
+  { id:'slack', cat:'Collaboration', catIcon:'ti-brand-slack', name:'Slack', desc:'Real-time push notifications for: competitor moves, ranking drops, content approval requests, A/B test wins, and daily AI briefings delivered to configured channels.', icon:'ti-brand-slack', iconBg:'rgba(224,30,90,0.12)', iconColor:'#E01E5A', powers:['All pages'], status:'live', meta:'14 channels · last alert 8m ago', hint:'OAuth · workspace install' },
+  { id:'jira', cat:'Collaboration', catIcon:'ti-brand-slack', name:'Jira', desc:'Sync AI-generated content briefs as Jira stories, track implementation tasks for new pages, pull sprint velocity to estimate realistic publishing timelines.', icon:'ti-brand-atlassian', iconBg:'rgba(0,82,204,0.12)', iconColor:'#0052CC', powers:['Content','Site detail'], status:'off', meta:'Not connected', hint:'OAuth · $7.75/user/mo' },
+  { id:'asana', cat:'Collaboration', catIcon:'ti-brand-slack', name:'Asana', desc:'Alternative workflow tool for content production. Auto-create tasks from AI briefs, assign writers, set deadlines, and track approval queue progress.', icon:'ti-circle-half-2', iconBg:'rgba(252,75,108,0.12)', iconColor:'#FC4B6C', powers:['Content'], status:'off', meta:'Not connected', hint:'OAuth · from $10/user/mo' },
+
+  // Social & Research
+  { id:'reddit', cat:'Social & Research', catIcon:'ti-world-search', name:'Reddit API', desc:'Monitor medical, finance, legal, and test-prep subreddits for brand mentions, trending questions, content gap ideas, and competitive sentiment analysis.', icon:'ti-brand-reddit', iconBg:'rgba(255,69,0,0.12)', iconColor:'#FF4500', powers:['Research','Page detail'], status:'off', meta:'Not connected', hint:'OAuth app · free tier' },
+  { id:'twitter', cat:'Social & Research', catIcon:'ti-world-search', name:'X (Twitter) API', desc:'Brand mention tracking, competitor announcement monitoring, trending exam hashtags, and social share counts for measuring published content virality.', icon:'ti-brand-x', iconBg:'rgba(255,255,255,0.08)', iconColor:'#E8EAED', powers:['Research','Competitors'], status:'off', meta:'Not connected', hint:'Developer app · $100+/mo' },
+  { id:'gtrends', cat:'Social & Research', catIcon:'ti-world-search', name:'Google Trends', desc:'Rising search interest curves, geographic intent heat maps by keyword, seasonal exam prep trends, and breakout topic detection to feed content calendar suggestions.', icon:'ti-trending-up', iconBg:'rgba(234,67,53,0.12)', iconColor:'#EA4335', powers:['Research','Content'], status:'off', meta:'Not connected', hint:'Via SerpAPI · from $50/mo' },
+];
+
+function renderSources() {
+  const container = document.getElementById('sourcesGrid');
+  if (!container) return;
+
+  // Update summary counts
+  const live   = SOURCES.filter(s => s.status === 'live').length;
+  const warn   = SOURCES.filter(s => s.status === 'reauth' || s.status === 'error').length;
+  const off    = SOURCES.filter(s => s.status === 'off').length;
+  const total  = SOURCES.length;
+  const pct    = Math.round((live / total) * 100);
+
+  const liveEl = document.getElementById('srcLiveNum');
+  const warnEl = document.getElementById('srcWarnNum');
+  const offEl  = document.getElementById('srcOffNum');
+  const fillEl = document.getElementById('srcProgressFill');
+  const lblEl  = document.getElementById('srcProgressLabel');
+  if (liveEl) liveEl.textContent = live;
+  if (warnEl) warnEl.textContent = warn;
+  if (offEl)  offEl.textContent  = off;
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (lblEl)  lblEl.textContent  = `${live} / ${total} sources active (${pct}%)`;
+
+  // Group by category preserving order
+  const cats = [];
+  SOURCES.forEach(s => { if (!cats.includes(s.cat)) cats.push(s.cat); });
+
+  let html = '';
+  cats.forEach(cat => {
+    const sources = SOURCES.filter(s => s.cat === cat);
+    const catIcon = sources[0].catIcon;
+    const liveC   = sources.filter(s => s.status === 'live').length;
+    const warnC   = sources.filter(s => s.status === 'reauth' || s.status === 'error').length;
+
+    html += `
+      <div class="src-cat-head">
+        <i class="ti ${catIcon}"></i>
+        ${cat}
+        <span class="src-cat-count">${liveC}/${sources.length} connected${warnC > 0 ? ' · <span style="color:var(--warn);">' + warnC + ' needs attention</span>' : ''}</span>
+        <div class="src-cat-line"></div>
+      </div>
+    `;
+
+    sources.forEach(s => {
+      const statusHtml =
+        s.status === 'live'   ? `<span class="pill pill-good">live</span>` :
+        s.status === 'reauth' ? `<span class="pill pill-warn">re-auth</span>` :
+        s.status === 'error'  ? `<span class="pill pill-bad">error</span>` :
+                                `<span class="pill pill-muted">not connected</span>`;
+
+      const btnHtml =
+        s.status === 'live'
+          ? `<button class="btn btn-sm" onclick="showToast('${s.name}', 'Connection healthy. Last sync: ${s.meta}')">Manage</button>`
+          : s.status === 'reauth'
+          ? `<button class="btn btn-sm btn-primary" onclick="showToast('Re-authenticating', 'OAuth flow started for ${s.name}.')">Re-auth</button>`
+          : `<button class="btn btn-sm" onclick="showToast('Connect ${s.name}', 'Opening authentication flow for ${s.name}...')">Connect</button>`;
+
+      const powersHtml = s.powers.map(p =>
+        `<span class="src-power">${p}</span>`
+      ).join('');
+
+      html += `
+        <div class="src-row">
+          <div class="src-icon" style="background:${s.iconBg};color:${s.iconColor};">
+            <i class="ti ${s.icon}"></i>
+          </div>
+          <div class="src-body">
+            <div class="src-name">${s.name}</div>
+            <div class="src-desc">${s.desc}</div>
+            <div class="src-powers">
+              <span class="src-powers-label">Powers:</span>
+              ${powersHtml}
+            </div>
+          </div>
+          <div class="src-right">
+            ${statusHtml}
+            ${btnHtml}
+            <div class="src-meta">${s.meta}</div>
+            <div class="src-hint">${s.hint}</div>
+          </div>
+        </div>
+      `;
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+// ── Audit log data ─────────────────────────────────────────────
+const AUDIT_EVENTS = [
+  { icon:'ti-sparkles', iconBg:'rgba(212,165,116,0.12)', iconColor:'var(--accent)', action:'AI briefing generated', detail:'Daily briefing compiled from GA4 + Ahrefs + competitor crawler · 3 alerts found', user:'System · AI', time:'09:14 · Today' },
+  { icon:'ti-check', iconBg:'rgba(74,222,128,0.12)', iconColor:'var(--good)', action:'Content approved and published', detail:'"10 mistakes to avoid on USMLE Step 1" published to uworld-medical.com', user:'Ravi Kumar', time:'08:52 · Today' },
+  { icon:'ti-target-arrow', iconBg:'rgba(248,113,113,0.12)', iconColor:'var(--bad)', action:'Competitor alert triggered', detail:'CompetitorX launched /free-medical-practice · position 6 for "free medical practice test"', user:'System · Crawler', time:'07:44 · Today' },
+  { icon:'ti-refresh', iconBg:'rgba(96,165,250,0.12)', iconColor:'var(--info)', action:'Data sync completed', detail:'Ahrefs + GSC + GA4 · 32 sites · 14,820 keywords refreshed', user:'System · Sync', time:'07:00 · Today' },
+  { icon:'ti-flask', iconBg:'rgba(74,222,128,0.12)', iconColor:'var(--good)', action:'A/B test called — winner declared', detail:'Pricing toggle position: Variant B wins · +12.4% conversion · rolling out to 100%', user:'Priya S.', time:'18:22 · Yesterday' },
+  { icon:'ti-plug-connected', iconBg:'rgba(248,113,113,0.12)', iconColor:'var(--bad)', action:'Integration re-auth required', detail:'WordPress tokens expired on 4 sites: uworld-legal, uworld-pharmacy, uworld-pa, themisbar', user:'System · Auth', time:'14:30 · Yesterday' },
+  { icon:'ti-user-plus', iconBg:'rgba(196,181,253,0.12)', iconColor:'#C4B5FD', action:'Team member invited', detail:'Marcus T. invited as Editor with access to Medical and Finance verticals', user:'Ravi Kumar', time:'11:02 · Yesterday' },
+  { icon:'ti-ad-2', iconBg:'rgba(251,191,36,0.12)', iconColor:'var(--warn)', action:'Banner performance alert', detail:'3 banners on uworld-nursing.com dropped below 0.1% CTR · AI refresh suggestions ready', user:'System · Ads', time:'09:15 · Yesterday' },
+  { icon:'ti-sparkles', iconBg:'rgba(212,165,116,0.12)', iconColor:'var(--accent)', action:'AI page brief generated', detail:'Counter-content brief for "/compare/uworld-vs-competitorx" · 2,400 words · assigned to Priya S.', user:'Ravi Kumar', time:'16:44 · May 21' },
+  { icon:'ti-settings', iconBg:'rgba(94,100,120,0.15)', iconColor:'var(--text-3)', action:'Settings updated', detail:'AI agency level changed from "Suggest only" to "Draft & queue"', user:'Ravi Kumar', time:'10:11 · May 21' },
+];
+
+function renderAuditLog() {
+  const el = document.getElementById('auditLog');
+  if (!el) return;
+  el.innerHTML = AUDIT_EVENTS.map(e => `
+    <div class="audit-row">
+      <div class="audit-icon" style="background:${e.iconBg};color:${e.iconColor};">
+        <i class="ti ${e.icon}"></i>
+      </div>
+      <div class="audit-body">
+        <div class="audit-action">${e.action}</div>
+        <div class="audit-detail">${e.detail} · <span style="color:var(--text-2);">${e.user}</span></div>
+      </div>
+      <div class="audit-time">${e.time}</div>
+    </div>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderSources();
+  renderAuditLog();
+});
+</script>
+
+</body>
+</html>

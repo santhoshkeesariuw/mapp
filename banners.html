@@ -1,0 +1,696 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ad Banners · UWorld</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.PAGE_META = { page: 'banners', title: 'Banners' };</script>
+<style>
+
+/* ── Tab bar ── */
+.bn-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+.bn-tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border: none; background: none;
+  color: var(--text-3); font-size: 13px; font-weight: 500;
+  font-family: inherit; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.15s; white-space: nowrap;
+}
+.bn-tab:hover { color: var(--text-2); }
+.bn-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.bn-tab i { font-size: 15px; }
+.bn-panel { display: none; }
+.bn-panel.active { display: block; }
+
+/* ── Site filter chips ── */
+.site-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+.site-chip {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--line-2); background: transparent; color: var(--text-3);
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+}
+.site-chip:hover { border-color: var(--accent); color: var(--text); }
+.site-chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+/* ── Banner preview ── */
+.banner-preview {
+  background: #141929; border-radius: 6px; border: 1px solid var(--line-2);
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; position: relative;
+}
+.bp-inner {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; padding: 6px; width: 100%; height: 100%;
+}
+.bp-logo { height: 6px; border-radius: 2px; background: rgba(212,165,116,0.5); }
+.bp-line { height: 4px; border-radius: 1px; background: rgba(255,255,255,0.1); }
+.bp-cta { height: 12px; border-radius: 3px; background: rgba(212,165,116,0.35); }
+.bp-label {
+  position: absolute; bottom: 3px; right: 4px;
+  font-size: 8px; color: rgba(255,255,255,0.2);
+  font-family: 'JetBrains Mono', monospace;
+}
+/* Leaderboard 728×90 → shown 180×22 */
+.bp-leaderboard { width: 180px; height: 22px; }
+.bp-leaderboard .bp-inner { flex-direction: row; padding: 3px 6px; gap: 6px; }
+.bp-leaderboard .bp-logo { width: 24px; height: 8px; }
+.bp-leaderboard .bp-line { flex: 1; }
+.bp-leaderboard .bp-cta { width: 32px; height: 14px; flex-shrink: 0; }
+/* Medium Rectangle 300×250 → shown 90×75 */
+.bp-rect { width: 90px; height: 75px; }
+.bp-rect .bp-logo { width: 40px; }
+.bp-rect .bp-line { width: 70%; }
+.bp-rect .bp-cta { width: 52px; margin-top: 4px; height: 14px; }
+/* Half Page 300×600 → shown 60×120 */
+.bp-halfpage { width: 60px; height: 120px; }
+.bp-halfpage .bp-logo { width: 36px; }
+.bp-halfpage .bp-line { width: 80%; }
+.bp-halfpage .bp-cta { width: 44px; margin-top: 6px; height: 14px; }
+/* Mobile 320×50 → shown 160×25 */
+.bp-mobile { width: 160px; height: 25px; }
+.bp-mobile .bp-inner { flex-direction: row; padding: 3px 6px; gap: 5px; }
+.bp-mobile .bp-logo { width: 20px; height: 7px; }
+.bp-mobile .bp-line { flex: 1; }
+.bp-mobile .bp-cta { width: 28px; height: 12px; flex-shrink: 0; }
+/* Sidebar 160×600 → shown 40×100 */
+.bp-skyscraper { width: 40px; height: 100px; }
+.bp-skyscraper .bp-logo { width: 28px; }
+.bp-skyscraper .bp-line { width: 85%; }
+.bp-skyscraper .bp-cta { width: 30px; margin-top: 4px; height: 12px; }
+
+/* ── Banner row ── */
+.banner-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.12s;
+  cursor: pointer;
+}
+.banner-row:last-child { border-bottom: none; }
+.banner-row:hover { background: var(--ink-3); }
+.banner-meta { padding: 0 16px; min-width: 0; }
+.banner-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.banner-placement { font-size: 11px; color: var(--text-3); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.banner-placement span { display: flex; align-items: center; gap: 4px; }
+.banner-stats { display: flex; gap: 24px; align-items: center; flex-shrink: 0; }
+.bstat { text-align: right; }
+.bstat-val { font-size: 14px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+.bstat-lbl { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: .07em; margin-top: 1px; }
+
+/* ── Site group ── */
+.site-group { margin-bottom: 16px; }
+.site-group-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: var(--ink-3); border-radius: 8px 8px 0 0;
+  border: 1px solid var(--line); border-bottom: none;
+}
+.site-group-body { border: 1px solid var(--line); border-radius: 0 0 8px 8px; overflow: hidden; }
+.site-group-name { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.site-group-stats { display: flex; gap: 20px; font-size: 12px; color: var(--text-3); }
+
+/* ── AI Suggestion cards ── */
+.sugg-banner-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.sugg-banner-card {
+  background: var(--ink-2); border: 1px solid var(--line);
+  border-radius: 10px; overflow: hidden;
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+.sugg-banner-card:hover { border-color: var(--accent); }
+.sbc-preview {
+  background: #0e1220; padding: 20px;
+  display: flex; align-items: center; justify-content: center;
+  border-bottom: 1px solid var(--line); min-height: 100px;
+}
+.sbc-body { padding: 14px 16px; }
+.sbc-site { font-size: 10px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 5px; }
+.sbc-title { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+.sbc-reason { font-size: 11px; color: var(--text-3); line-height: 1.55; margin-bottom: 12px; }
+.sbc-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sbc-lift { font-size: 13px; font-weight: 700; color: var(--good); }
+
+/* ── Mini chart inside banner card ── */
+.mini-perf-chart { height: 40px; width: 100%; }
+
+@media (max-width: 768px) {
+  .banner-stats { gap: 12px; }
+  .bstat { display: none; }
+  .bstat:first-child, .bstat:nth-child(2) { display: block; }
+  .sugg-banner-grid { grid-template-columns: 1fr; }
+  .banner-row { grid-template-columns: auto 1fr; }
+  .banner-stats { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <main class="main">
+    <div class="page fade-in">
+
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">Workspace</div>
+          <h1 class="page-title">Ad Banners</h1>
+          <p class="page-sub">Manage and optimise in-page banner ads across all UWorld sites</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn"><i class="ti ti-download"></i>Export report</button>
+          <button class="btn btn-primary" id="addBannerBtn"><i class="ti ti-plus"></i>Add banner</button>
+        </div>
+      </div>
+
+      <!-- Top metrics -->
+      <div class="metrics" id="topMetrics"></div>
+
+      <!-- Tab bar -->
+      <div class="bn-tabs">
+        <button class="bn-tab active" data-tab="current"><i class="ti ti-layout-list"></i>Current ads</button>
+        <button class="bn-tab" data-tab="suggested"><i class="ti ti-sparkles"></i>AI suggested ads</button>
+      </div>
+
+      <!-- ════ CURRENT ADS ════ -->
+      <div id="tab-current" class="bn-panel active">
+
+        <!-- Site filter -->
+        <div class="site-filters" id="siteFilters"></div>
+
+        <!-- Banners grouped by site -->
+        <div id="bannerGroups"></div>
+
+      </div>
+
+      <!-- ════ AI SUGGESTED ADS ════ -->
+      <div id="tab-suggested" class="bn-panel">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:15px;font-weight:600;">AI-suggested banners</div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:3px;">Based on traffic patterns, content analysis and competitor placements · refreshed 1 hour ago</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn"><i class="ti ti-filter"></i>Filter by site</button>
+            <button class="btn"><i class="ti ti-refresh"></i>Refresh AI</button>
+          </div>
+        </div>
+
+        <!-- AI metrics strip -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;" id="aiMetrics"></div>
+
+        <div class="sugg-banner-grid" id="suggestedBanners"></div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+// ────────────────────────────────────────────────
+// DATA
+// ────────────────────────────────────────────────
+const SITES = [
+  'medical.uworld', 'nursing.uworld', 'pa.uworld',
+  'accounting.uworld', 'finance.uworld', 'legal.uworld',
+];
+
+const CURRENT_ADS = [
+  // medical.uworld
+  {
+    id: 'med-1', site: 'medical.uworld',
+    name: 'Step 1 Qbank — Free Trial',
+    format: 'Leaderboard', dims: '728×90',
+    placement: 'Below header', page: '/practice/step-1',
+    status: 'active', statusColor: 'var(--good)',
+    impressions: 284000, ctr: 3.8, clicks: 10792, cpm: 4.20, revenue: 1193,
+    trend: 'up', startDate: 'Jan 12, 2025',
+  },
+  {
+    id: 'med-2', site: 'medical.uworld',
+    name: 'USMLE Prep Bundle — Save 30%',
+    format: 'Medium Rectangle', dims: '300×250',
+    placement: 'Mid-article sidebar', page: '/resources/mnemonics',
+    status: 'active', statusColor: 'var(--good)',
+    impressions: 142000, ctr: 2.4, clicks: 3408, cpm: 3.60, revenue: 511,
+    trend: 'up', startDate: 'Feb 3, 2025',
+  },
+  {
+    id: 'med-3', site: 'medical.uworld',
+    name: 'Step 2 CK Launch — Limited Offer',
+    format: 'Half Page', dims: '300×600',
+    placement: 'Right rail', page: '/practice/step-2-ck',
+    status: 'paused', statusColor: 'var(--warn)',
+    impressions: 68000, ctr: 1.9, clicks: 1292, cpm: 3.10, revenue: 211,
+    trend: 'down', startDate: 'Mar 1, 2025',
+  },
+  {
+    id: 'med-4', site: 'medical.uworld',
+    name: 'Mobile — Try Free Questions',
+    format: 'Mobile Banner', dims: '320×50',
+    placement: 'Sticky bottom', page: '/practice/free',
+    status: 'active', statusColor: 'var(--good)',
+    impressions: 196000, ctr: 4.2, clicks: 8232, cpm: 2.80, revenue: 549,
+    trend: 'up', startDate: 'Feb 20, 2025',
+  },
+  // nursing.uworld
+  {
+    id: 'nur-1', site: 'nursing.uworld',
+    name: 'NCLEX Qbank — 10% Off',
+    format: 'Leaderboard', dims: '728×90',
+    placement: 'Below header', page: '/nclex/rn',
+    status: 'active', statusColor: 'var(--good)',
+    impressions: 178000, ctr: 3.1, clicks: 5518, cpm: 3.90, revenue: 694,
+    trend: 'up', startDate: 'Jan 28, 2025',
+  },
+  {
+    id: 'nur-2', site: 'nursing.uworld',
+    name: 'NCLEX-PN Prep — New Content',
+    format: 'Medium Rectangle', dims: '300×250',
+    placement: 'End of article', page: '/nclex/pn',
+    status: 'active', statusColor: 'var(--good)',
+    impressions: 94000, ctr: 2.7, clicks: 2538, cpm: 3.40, revenue: 320,
+    trend: 'flat', startDate: 'Mar 10, 2025',
+  },
+  // pa.uworld
+  {
+    id: 'pa-1', site: 'pa.uworld',
+    name: 'PANCE Practice — Full Access',
+    format: 'Leaderboard', dims: '728×90',
+    placement: 'Below header', page: '/pance/overview',
+    status: 'active', statusColor: 'var(--good)',
+    impressions: 112000, ctr: 2.9, clicks: 3248, cpm: 3.70, revenue: 414,
+    trend: 'up', startDate: 'Feb 14, 2025',
+  },
+  {
+    id: 'pa-2', site: 'pa.uworld',
+    name: 'Study Schedule — Download Free',
+    format: 'Mobile Banner', dims: '320×50',
+    placement: 'Sticky bottom', page: '/resources',
+    status: 'paused', statusColor: 'var(--warn)',
+    impressions: 44000, ctr: 1.4, clicks: 616, cpm: 2.10, revenue: 92,
+    trend: 'down', startDate: 'Jan 5, 2025',
+  },
+  // accounting.uworld
+  {
+    id: 'acc-1', site: 'accounting.uworld',
+    name: 'CPA Exam Prep — Starts at $149',
+    format: 'Leaderboard', dims: '728×90',
+    placement: 'Below header', page: '/cpa/overview',
+    status: 'active', statusColor: 'var(--good)',
+    impressions: 88000, ctr: 2.2, clicks: 1936, cpm: 3.20, revenue: 282,
+    trend: 'up', startDate: 'Mar 5, 2025',
+  },
+  // finance.uworld
+  {
+    id: 'fin-1', site: 'finance.uworld',
+    name: 'CFA Level 1 — Early Bird Deal',
+    format: 'Medium Rectangle', dims: '300×250',
+    placement: 'Sidebar', page: '/cfa/level-1',
+    status: 'active', statusColor: 'var(--good)',
+    impressions: 74000, ctr: 1.8, clicks: 1332, cpm: 2.90, revenue: 215,
+    trend: 'flat', startDate: 'Feb 8, 2025',
+  },
+  // legal.uworld
+  {
+    id: 'leg-1', site: 'legal.uworld',
+    name: 'Bar Exam Qbank — 7-Day Free Trial',
+    format: 'Leaderboard', dims: '728×90',
+    placement: 'Below header', page: '/bar/overview',
+    status: 'active', statusColor: 'var(--good)',
+    impressions: 56000, ctr: 2.6, clicks: 1456, cpm: 3.50, revenue: 196,
+    trend: 'up', startDate: 'Jan 20, 2025',
+  },
+  {
+    id: 'leg-2', site: 'legal.uworld',
+    name: 'Bar Exam — Exit Intent Overlay',
+    format: 'Half Page', dims: '300×600',
+    placement: 'Exit intent popup', page: '/bar/practice',
+    status: 'ended', statusColor: 'var(--text-3)',
+    impressions: 32000, ctr: 5.1, clicks: 1632, cpm: 4.80, revenue: 154,
+    trend: 'down', startDate: 'Dec 1, 2024',
+  },
+];
+
+const AI_SUGGESTIONS = [
+  {
+    id: 'ai-1',
+    site: 'medical.uworld',
+    name: 'AI Tutor — Personalised Study Plan',
+    format: 'Medium Rectangle', dims: '300×250',
+    placement: 'After 1st scroll stop on blog posts',
+    priority: 'Critical',
+    priorityColor: 'var(--bad)',
+    lift: '+41% CTR',
+    liftColor: 'var(--good)',
+    reason: 'Heatmap shows users pause for 8+ seconds after the intro paragraph on 14 blog posts. No banner is served at this high-attention moment. Competitor AMBOSS runs a personalised ad here.',
+    creative: 'Hero headline "What should you study next?" + AI sparkle icon + CTA "Build my plan" — aligns with the decision-making moment.',
+    estImpressions: '380K/mo', estRevenue: '+$1,840/mo',
+    format_class: 'bp-rect',
+    accentColor: 'rgba(212,165,116,0.4)',
+  },
+  {
+    id: 'ai-2',
+    site: 'nursing.uworld',
+    name: 'NCLEX Next Gen — New Format Alert',
+    format: 'Leaderboard', dims: '728×90',
+    placement: 'Top of /nclex/next-gen page (currently empty)',
+    priority: 'Critical',
+    priorityColor: 'var(--bad)',
+    lift: '+28% CTR',
+    liftColor: 'var(--good)',
+    reason: 'NCLEX Next Gen format queries up +210% YoY. This page gets 22K sessions/mo with zero monetisation. A leaderboard banner here would capture peak-intent traffic.',
+    creative: 'Bold "Next Gen NCLEX — Are You Ready?" headline with urgency badge + "Try 50 NGN questions free" CTA.',
+    estImpressions: '220K/mo', estRevenue: '+$1,240/mo',
+    format_class: 'bp-leaderboard',
+    accentColor: 'rgba(96,165,250,0.4)',
+  },
+  {
+    id: 'ai-3',
+    site: 'medical.uworld',
+    name: 'Pass Guarantee — Remove Price Objection',
+    format: 'Half Page', dims: '300×600',
+    placement: 'Right rail on /pricing page',
+    priority: 'High',
+    priorityColor: 'var(--warn)',
+    lift: '+19% conversion',
+    liftColor: 'var(--good)',
+    reason: '534 social mentions flag price as a concern. The pricing page right rail is empty. A half-page banner with the pass-guarantee value prop and a cost-per-question breakdown directly combats this at the bottom of funnel.',
+    creative: '"Less than $1 per question" framing + pass rate stat + "See pricing" CTA. Neutral background to feel like content, not an ad.',
+    estImpressions: '96K/mo', estRevenue: '+$820/mo',
+    format_class: 'bp-halfpage',
+    accentColor: 'rgba(74,222,128,0.35)',
+  },
+  {
+    id: 'ai-4',
+    site: 'pa.uworld',
+    name: 'PANCE Study Schedule — Free Download',
+    format: 'Mobile Banner', dims: '320×50',
+    placement: 'Sticky bottom on mobile — all /resources pages',
+    priority: 'High',
+    priorityColor: 'var(--warn)',
+    lift: '+34% CTR',
+    liftColor: 'var(--good)',
+    reason: '68% of /resources traffic is mobile. No sticky banner is served on mobile. A free-download sticky with lead-capture converts resource browsers into subscribers at high volume.',
+    creative: '"Get your free PANCE study schedule" + arrow CTA. Minimal copy — thumb-friendly tap target.',
+    estImpressions: '140K/mo', estRevenue: '+$490/mo',
+    format_class: 'bp-mobile',
+    accentColor: 'rgba(196,181,253,0.4)',
+  },
+  {
+    id: 'ai-5',
+    site: 'accounting.uworld',
+    name: 'CPA FAR Section — Targeted Retarget',
+    format: 'Medium Rectangle', dims: '300×250',
+    placement: 'End of /cpa/far articles (highest exit rate)',
+    priority: 'Medium',
+    priorityColor: 'var(--info)',
+    lift: '+22% CTR',
+    liftColor: 'var(--good)',
+    reason: 'CPA FAR pages have the highest exit rate (82%) on accounting.uworld. A retargeting banner at the article end captures users before they leave — they have proven subject intent.',
+    creative: 'FAR-specific copy "Mastering FAR? Test yourself with 300+ practice questions" + difficulty badge. Avoids generic messaging.',
+    estImpressions: '68K/mo', estRevenue: '+$360/mo',
+    format_class: 'bp-rect',
+    accentColor: 'rgba(251,191,36,0.35)',
+  },
+  {
+    id: 'ai-6',
+    site: 'finance.uworld',
+    name: 'CFA vs FRM — Comparison Decision Banner',
+    format: 'Leaderboard', dims: '728×90',
+    placement: 'Top of comparison content pages',
+    priority: 'Medium',
+    priorityColor: 'var(--info)',
+    lift: '+17% CTR',
+    liftColor: 'var(--good)',
+    reason: '"CFA vs FRM" gets 4,800 searches/mo — comparison-intent visitors are deciding between programs. A leaderboard that surfaces the UWorld CFA offering at this moment of consideration is high-ROI.',
+    creative: '"Already decided on CFA? Start with 50 free L1 questions" — acknowledges the decision context.',
+    estImpressions: '48K/mo', estRevenue: '+$220/mo',
+    format_class: 'bp-leaderboard',
+    accentColor: 'rgba(212,165,116,0.4)',
+  },
+];
+
+// ────────────────────────────────────────────────
+// HELPERS
+// ────────────────────────────────────────────────
+function fmt(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000)    return (n/1000).toFixed(0) + 'K';
+  return n;
+}
+function fmtCurrency(n) {
+  return '$' + n.toLocaleString();
+}
+function trendIcon(t) {
+  if (t === 'up')   return `<i class="ti ti-trending-up"   style="color:var(--good);font-size:13px;"></i>`;
+  if (t === 'down') return `<i class="ti ti-trending-down" style="color:var(--bad);font-size:13px;"></i>`;
+  return `<i class="ti ti-minus" style="color:var(--text-3);font-size:13px;"></i>`;
+}
+
+function bannerPreviewHTML(format) {
+  const cls = {
+    'Leaderboard':      'bp-leaderboard',
+    'Medium Rectangle': 'bp-rect',
+    'Half Page':        'bp-halfpage',
+    'Mobile Banner':    'bp-mobile',
+    'Wide Skyscraper':  'bp-skyscraper',
+  }[format] || 'bp-rect';
+  const dimLabel = { 'Leaderboard':'728×90','Medium Rectangle':'300×250','Half Page':'300×600','Mobile Banner':'320×50','Wide Skyscraper':'160×600' }[format] || '';
+  return `<div class="banner-preview ${cls}"><div class="bp-inner"><div class="bp-logo"></div><div class="bp-line"></div><div class="bp-cta"></div></div><span class="bp-label">${dimLabel}</span></div>`;
+}
+
+// ────────────────────────────────────────────────
+// RENDER
+// ────────────────────────────────────────────────
+function renderTopMetrics() {
+  const total        = CURRENT_ADS.length;
+  const active       = CURRENT_ADS.filter(a => a.status === 'active').length;
+  const totalImpr    = CURRENT_ADS.reduce((s,a) => s+a.impressions, 0);
+  const totalRev     = CURRENT_ADS.reduce((s,a) => s+a.revenue, 0);
+  const avgCTR       = (CURRENT_ADS.reduce((s,a) => s+a.ctr, 0) / CURRENT_ADS.length).toFixed(2);
+
+  document.getElementById('topMetrics').innerHTML = `
+    <div class="metric-card">
+      <div class="metric-label">Total banners</div>
+      <div class="metric-val">${total}</div>
+      <div class="metric-delta up"><i class="ti ti-ad-2"></i>${active} active</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Impressions · 30d</div>
+      <div class="metric-val">${fmt(totalImpr)}</div>
+      <div class="metric-delta up"><i class="ti ti-trending-up"></i>+14%</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Avg CTR</div>
+      <div class="metric-val">${avgCTR}<span class="unit">%</span></div>
+      <div class="metric-delta up"><i class="ti ti-trending-up"></i>+0.4pp</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Revenue · 30d</div>
+      <div class="metric-val">${fmtCurrency(totalRev)}</div>
+      <div class="metric-delta up"><i class="ti ti-trending-up"></i>+22%</div>
+    </div>
+  `;
+}
+
+function renderSiteFilters(activeSite) {
+  const all = ['All sites', ...SITES];
+  document.getElementById('siteFilters').innerHTML = all.map(s => `
+    <button class="site-chip ${activeSite === s ? 'active' : ''}" data-site="${s}">${s}</button>
+  `).join('');
+  document.querySelectorAll('.site-chip').forEach(btn => {
+    btn.addEventListener('click', () => renderBannerGroups(btn.dataset.site));
+  });
+}
+
+function renderBannerGroups(filterSite = 'All sites') {
+  // Update chip active state
+  document.querySelectorAll('.site-chip').forEach(c =>
+    c.classList.toggle('active', c.dataset.site === filterSite)
+  );
+  const sites = filterSite === 'All sites' ? SITES : [filterSite];
+  const container = document.getElementById('bannerGroups');
+  container.innerHTML = '';
+
+  sites.forEach(site => {
+    const ads = CURRENT_ADS.filter(a => a.site === site);
+    if (!ads.length) return;
+
+    const totalImpr = ads.reduce((s,a) => s+a.impressions, 0);
+    const totalRev  = ads.reduce((s,a) => s+a.revenue, 0);
+    const active    = ads.filter(a => a.status === 'active').length;
+    const dot       = ['medical.uworld','nursing.uworld','pa.uworld','accounting.uworld'].includes(site) ? 'var(--good)' : 'var(--warn)';
+
+    const rows = ads.map(ad => `
+      <div class="banner-row" data-id="${ad.id}">
+        ${bannerPreviewHTML(ad.format)}
+        <div class="banner-meta">
+          <div class="banner-name">${ad.name}</div>
+          <div class="banner-placement">
+            <span><i class="ti ti-layout" style="font-size:11px;"></i>${ad.format} · ${ad.dims}</span>
+            <span><i class="ti ti-map-pin" style="font-size:11px;"></i>${ad.placement}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);">${ad.page}</span>
+            <span class="pill" style="background:${ad.statusColor}22;color:${ad.statusColor};font-size:10px;padding:1px 7px;">${ad.status}</span>
+          </div>
+        </div>
+        <div class="banner-stats">
+          <div class="bstat">
+            <div class="bstat-val">${fmt(ad.impressions)}</div>
+            <div class="bstat-lbl">Impr.</div>
+          </div>
+          <div class="bstat">
+            <div class="bstat-val" style="color:var(--accent);">${ad.ctr}%</div>
+            <div class="bstat-lbl">CTR</div>
+          </div>
+          <div class="bstat">
+            <div class="bstat-val">${fmt(ad.clicks)}</div>
+            <div class="bstat-lbl">Clicks</div>
+          </div>
+          <div class="bstat">
+            <div class="bstat-val" style="color:var(--good);">${fmtCurrency(ad.revenue)}</div>
+            <div class="bstat-lbl">Revenue</div>
+          </div>
+          <div class="bstat" style="padding-left:8px;">
+            ${trendIcon(ad.trend)}
+          </div>
+          <div class="bstat">
+            <button class="btn btn-sm" style="font-size:11px;padding:4px 10px;">Edit</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    container.insertAdjacentHTML('beforeend', `
+      <div class="site-group">
+        <div class="site-group-head">
+          <div class="site-group-name">
+            <i class="ti ti-circle-filled" style="color:${dot};font-size:8px;"></i>
+            ${site}
+            <span style="font-size:11px;color:var(--text-3);font-weight:400;">${ads.length} banner${ads.length>1?'s':''} · ${active} active</span>
+          </div>
+          <div class="site-group-stats">
+            <span>${fmt(totalImpr)} impr</span>
+            <span style="color:var(--good);">${fmtCurrency(totalRev)} revenue</span>
+            <button class="btn btn-sm" style="font-size:11px;"><i class="ti ti-plus" style="font-size:11px;"></i>Add</button>
+          </div>
+        </div>
+        <div class="site-group-body">${rows}</div>
+      </div>
+    `);
+  });
+}
+
+function renderAiMetrics() {
+  const potentialRev = AI_SUGGESTIONS.reduce((s,a) => {
+    const n = parseInt(a.estRevenue.replace(/[^0-9]/g,''));
+    return s + n;
+  }, 0);
+  document.getElementById('aiMetrics').innerHTML = `
+    <div class="metric-card">
+      <div class="metric-label">Suggestions</div>
+      <div class="metric-val">${AI_SUGGESTIONS.length}</div>
+      <div class="metric-delta up"><i class="ti ti-sparkles"></i>AI-generated</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Est. new revenue/mo</div>
+      <div class="metric-val" style="color:var(--good);">+${fmtCurrency(potentialRev)}</div>
+      <div class="metric-delta up"><i class="ti ti-trending-up"></i>if all deployed</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Critical priority</div>
+      <div class="metric-val">${AI_SUGGESTIONS.filter(a=>a.priority==='Critical').length}</div>
+      <div class="metric-delta down"><i class="ti ti-alert-circle"></i>act now</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Sites covered</div>
+      <div class="metric-val">${[...new Set(AI_SUGGESTIONS.map(a=>a.site))].length}</div>
+      <div class="metric-delta up"><i class="ti ti-world"></i>of ${SITES.length} sites</div>
+    </div>
+  `;
+}
+
+function renderSuggestedBanners() {
+  document.getElementById('suggestedBanners').innerHTML = AI_SUGGESTIONS.map(s => `
+    <div class="sugg-banner-card" data-id="${s.id}">
+      <div class="sbc-preview">
+        <div class="banner-preview ${s.format_class}" style="transform:scale(1.15);">
+          <div class="bp-inner" style="--accent-preview:${s.accentColor};">
+            <div class="bp-logo" style="background:${s.accentColor};"></div>
+            <div class="bp-line"></div>
+            <div class="bp-cta" style="background:${s.accentColor};"></div>
+          </div>
+          <span class="bp-label">${s.dims}</span>
+        </div>
+      </div>
+      <div class="sbc-body">
+        <div class="sbc-site">${s.site}</div>
+        <div class="sbc-title">${s.name}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-map-pin" style="font-size:11px;"></i>${s.placement}
+        </div>
+        <div class="sbc-reason">${s.reason}</div>
+        <div style="background:var(--ink-3);border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:11px;color:var(--text-3);line-height:1.55;">
+          <span style="color:var(--text-2);font-weight:600;">Creative direction: </span>${s.creative}
+        </div>
+        <div class="sbc-footer">
+          <div style="display:flex;gap:14px;">
+            <div>
+              <div class="sbc-lift">${s.lift}</div>
+              <div style="font-size:10px;color:var(--text-3);">Est. CTR lift</div>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--good);">${s.estRevenue}</div>
+              <div style="font-size:10px;color:var(--text-3);">Est. revenue</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="pill" style="background:${s.priorityColor}22;color:${s.priorityColor};font-size:10px;padding:2px 8px;">${s.priority}</span>
+            <button class="btn btn-sm btn-primary" style="font-size:11px;padding:4px 10px;"><i class="ti ti-plus" style="font-size:11px;"></i>Deploy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ────────────────────────────────────────────────
+// TABS + INIT
+// ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Tab switching
+  document.querySelectorAll('.bn-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.bn-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.bn-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Render everything
+  renderTopMetrics();
+  renderSiteFilters('All sites');
+  renderBannerGroups('All sites');
+  renderAiMetrics();
+  renderSuggestedBanners();
+});
+</script>
+
+</body>
+</html>
+

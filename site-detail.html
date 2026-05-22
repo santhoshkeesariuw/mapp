@@ -1,0 +1,673 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Site detail · UWorld</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.PAGE_META = { page: 'sites', title: 'Site detail' };</script>
+<style>
+/* ── AI Suggested Pages ── */
+.suggested-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 4px;
+}
+.sugg-card {
+  background: var(--ink-3);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.sugg-card:hover { border-color: var(--accent); background: rgba(212,165,116,0.04); }
+.sugg-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.sugg-card:hover::before { opacity: 1; }
+.sugg-type { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.sugg-url { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); font-weight: 500; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sugg-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; line-height: 1.4; }
+.sugg-reason { font-size: 11px; color: var(--text-3); line-height: 1.5; margin-bottom: 12px; }
+.sugg-footer { display: flex; align-items: center; justify-content: space-between; }
+.sugg-impact { font-size: 12px; font-weight: 700; }
+.sugg-cta { font-size: 11px; color: var(--text-3); display: flex; align-items: center; gap: 4px; }
+.sugg-cta i { font-size: 12px; }
+.sugg-card:hover .sugg-cta { color: var(--accent); }
+
+/* ── Slide-over panel ── */
+.page-brief-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+}
+.page-brief-overlay.open { display: block; }
+.page-brief-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 61;
+  width: 720px; max-width: 100vw;
+  background: var(--ink-2);
+  border-left: 1px solid var(--line-2);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s ease;
+  overflow: hidden;
+}
+.page-brief-panel.open { transform: translateX(0); }
+.panel-head {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  flex-shrink: 0;
+}
+.panel-close {
+  width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--line);
+  background: transparent; color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.panel-close:hover { background: var(--ink-3); color: var(--text); }
+.panel-body { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+.panel-section-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--text-3); margin-bottom: 12px; display: flex; align-items: center; gap: 7px;
+}
+.panel-section-title i { font-size: 13px; }
+.outcome-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.outcome-tile { background: var(--ink-3); border-radius: 8px; padding: 12px 14px; }
+.outcome-num { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+.outcome-lbl { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; }
+
+/* ── Wireframe ── */
+.wf-wrap {
+  background: #0d111e;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 0;
+}
+.wf-bar { height: 36px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 14px; gap: 10px; }
+.wf-logo { width: 56px; height: 12px; background: rgba(212,165,116,0.3); border-radius: 3px; }
+.wf-nav-links { display: flex; gap: 8px; margin-left: auto; }
+.wf-nav-link { width: 36px; height: 8px; background: rgba(255,255,255,0.08); border-radius: 2px; }
+.wf-btn-sm { width: 52px; height: 20px; background: rgba(212,165,116,0.25); border-radius: 3px; }
+.wf-hero { padding: 24px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+.wf-h1 { width: 68%; height: 14px; background: rgba(255,255,255,0.15); border-radius: 3px; }
+.wf-h2 { width: 52%; height: 10px; background: rgba(255,255,255,0.08); border-radius: 3px; }
+.wf-sub { width: 78%; height: 7px; background: rgba(255,255,255,0.05); border-radius: 2px; }
+.wf-cta-row { display: flex; gap: 8px; justify-content: center; margin-top: 4px; }
+.wf-cta { width: 90px; height: 28px; background: rgba(212,165,116,0.3); border-radius: 5px; }
+.wf-cta.ghost { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); }
+.wf-section { padding: 18px 20px; border-bottom: 1px solid var(--line); }
+.wf-section-lbl { width: 80px; height: 7px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-bottom: 12px; }
+.wf-cols { display: flex; gap: 10px; }
+.wf-col { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.wf-row { height: 7px; background: rgba(255,255,255,0.06); border-radius: 2px; }
+.wf-row.dark { background: rgba(255,255,255,0.04); width: 75%; }
+.wf-box { background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.wf-box-head { height: 9px; background: rgba(255,255,255,0.1); border-radius: 2px; width: 55%; }
+.wf-table-row { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.wf-tc { height: 7px; background: rgba(255,255,255,0.07); border-radius: 2px; flex: 1; }
+.wf-tc.hi { background: rgba(212,165,116,0.2); }
+.wf-badge { width: 36px; height: 16px; border-radius: 10px; background: rgba(74,222,128,0.15); flex-shrink: 0; }
+.wf-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: .08em; line-height: 1; display: block; }
+.wf-proof { display: flex; gap: 8px; }
+.wf-star-row { display: flex; gap: 3px; margin-bottom: 5px; }
+.wf-star { width: 10px; height: 10px; background: rgba(251,191,36,0.4); border-radius: 1px; }
+.wf-avatar { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.08); flex-shrink: 0; }
+
+@media (max-width: 768px) {
+  .suggested-grid { grid-template-columns: 1fr; }
+  .page-brief-panel { width: 100vw; }
+  .outcome-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <main class="main">
+    <div class="page fade-in">
+
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow"><a href="sites.html" style="color: var(--accent);">← All sites</a></div>
+          <h1 class="page-title"><span id="siteName">uworld-medical.com</span></h1>
+          <p class="page-sub" id="siteVertical">Medical vertical · USMLE Step 1–3 · 487 indexed pages · DA 76</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn"><i class="ti ti-external-link"></i>Visit site</button>
+          <button class="btn"><i class="ti ti-settings"></i>Site settings</button>
+          <button class="btn btn-primary"><i class="ti ti-sparkles"></i>AI audit</button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Sessions · 30d</div><div class="metric-value">847<span class="unit">K</span></div><div class="metric-delta up"><i class="ti ti-trending-up"></i>+12%</div></div>
+        <div class="metric"><div class="metric-label">Conversion rate</div><div class="metric-value">4.8<span class="unit">%</span></div><div class="metric-delta up"><i class="ti ti-trending-up"></i>+0.6pp</div></div>
+        <div class="metric"><div class="metric-label">Avg position</div><div class="metric-value">4.2</div><div class="metric-delta up"><i class="ti ti-trending-up"></i>+0.8</div></div>
+        <div class="metric"><div class="metric-label">Revenue · 30d</div><div class="metric-value">$684<span class="unit">K</span></div><div class="metric-delta up"><i class="ti ti-trending-up"></i>+18%</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-chart-area-line"></i>Traffic · last 90 days</div>
+          <div class="seg-tabs">
+            <button class="seg-tab">7d</button>
+            <button class="seg-tab on">30d</button>
+            <button class="seg-tab">90d</button>
+          </div>
+        </div>
+        <div class="chart-wrap lg"><canvas id="siteTraffic"></canvas></div>
+      </div>
+
+      <div class="briefing">
+        <div class="briefing-head">
+          <span class="briefing-tag"><span class="pulse"></span>AI suggestions for this site</span>
+          <span class="briefing-time">3 high-impact opportunities</span>
+        </div>
+        <div class="alerts">
+          <div class="alert-row info">
+            <div class="alert-num">1</div>
+            <div class="alert-body">
+              <div class="alert-title">Refresh "USMLE Step 1 high-yield topics" — drafted 18mo ago</div>
+              <div class="alert-text">Page ranks #6 for high-value KW (24K vol). Competitors have fresher content. Predicted lift: <b>+8K sessions/mo</b>.</div>
+            </div>
+          </div>
+          <div class="alert-row info">
+            <div class="alert-num">2</div>
+            <div class="alert-body">
+              <div class="alert-title">Create video for "USMLE study schedule" page</div>
+              <div class="alert-text">Top 3 ranking but 0% scroll past 60%. Embed video to lift engagement and dwell time.</div>
+            </div>
+          </div>
+          <div class="alert-row info">
+            <div class="alert-num">3</div>
+            <div class="alert-body">
+              <div class="alert-title">Add FAQ schema to top 8 practice pages</div>
+              <div class="alert-text">Currently missing schema markup. Could win featured snippets for 12 queries.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-list"></i>Top pages on this site</div>
+          <a class="btn btn-sm" href="sites.html">See full tree</a>
+        </div>
+        <table>
+          <thead><tr><th>Page</th><th class="right">Sessions</th><th class="right">Rank</th><th class="right">Conv.</th><th class="right">Score</th><th class="right">Status</th></tr></thead>
+          <tbody>
+            <tr><td><b>/</b> <span style="color: var(--text-3); font-size: 11px; margin-left: 6px;">Home</span></td><td class="num right">142K</td><td class="num right">#1</td><td class="num right">6.2%</td><td class="num right" style="color: var(--good); font-weight: 600;">96</td><td class="right"><span class="pill pill-good">healthy</span></td></tr>
+            <tr><td><b>/practice/step-1</b></td><td class="num right">84K</td><td class="num right">#2</td><td class="num right">5.4%</td><td class="num right" style="color: var(--good); font-weight: 600;">94</td><td class="right"><span class="pill pill-good">healthy</span></td></tr>
+            <tr><td><b>/practice/step-2-ck</b></td><td class="num right">62K</td><td class="num right">#3</td><td class="num right">4.8%</td><td class="num right" style="color: var(--good); font-weight: 600;">91</td><td class="right"><span class="pill pill-good">healthy</span></td></tr>
+            <tr><td><b>/pricing</b></td><td class="num right">48K</td><td class="num right">#2</td><td class="num right">4.2%</td><td class="num right" style="color: var(--good); font-weight: 600;">84</td><td class="right"><span class="pill pill-good">healthy</span></td></tr>
+            <tr><td><b>/resources/mnemonics</b></td><td class="num right">38K</td><td class="num right">#4</td><td class="num right">3.2%</td><td class="num right" style="color: var(--good); font-weight: 600;">89</td><td class="right"><span class="pill pill-good">healthy</span></td></tr>
+            <tr><td><b>/practice/free</b></td><td class="num right">24K</td><td class="num right">#8</td><td class="num right">2.1%</td><td class="num right" style="color: var(--warn); font-weight: 600;">76</td><td class="right"><span class="pill pill-warn">warn</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ════ AI SUGGESTED PAGES ════ -->
+      <div class="card" style="margin-top:20px;">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-sparkles"></i>AI-suggested new pages</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text-3);">6 opportunities · est. <span style="color:var(--good);font-weight:600;">+$284K</span> annual revenue</span>
+            <button class="btn btn-sm"><i class="ti ti-refresh"></i>Refresh</button>
+          </div>
+        </div>
+        <div class="suggested-grid" id="suggestedGrid"></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ════ PAGE BRIEF OVERLAY + PANEL ════ -->
+<div class="page-brief-overlay" id="briefOverlay"></div>
+<div class="page-brief-panel" id="briefPanel">
+  <div class="panel-head">
+    <div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-3);margin-bottom:6px;" id="briefType">New page</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);font-weight:500;margin-bottom:6px;" id="briefUrl">/url</div>
+      <div style="font-size:16px;font-weight:600;color:var(--text);" id="briefTitle">Page title</div>
+    </div>
+    <button class="panel-close" id="briefClose"><i class="ti ti-x" style="font-size:15px;"></i></button>
+  </div>
+  <div class="panel-body" id="briefBody"></div>
+</div>
+
+<script src="app.js"></script>
+<script>
+  // ── Suggested pages data ──────────────────────────────────────────────
+  const SUGGESTED_PAGES = [
+    {
+      id: 'compare',
+      type: 'Comparison page',
+      typeIcon: 'ti-git-compare',
+      url: '/compare/uworld-vs-amboss',
+      title: 'UWorld vs AMBOSS — Full Comparison',
+      reason: '12,000 monthly searches, zero coverage on this site. Top 3 competitors all rank for it.',
+      impact: '+$96K/yr',
+      impactColor: 'var(--good)',
+      priority: 'Critical',
+      priorityColor: 'var(--bad)',
+      why: [
+        'This is the #1 comparison query in the med-prep space (12,000 searches/mo, $4.80 CPC). Currently all 3 top-ranking pages belong to competitors — AMBOSS, Kaplan, and BoardVitals.',
+        'Users searching this term are deep in the decision funnel. A well-optimized comparison page capturing even 8% of this traffic at existing conversion rates would generate ~620 new subscriptions/month.',
+        'Google AI Overview references competitor comparison pages 4× more often than individual product pages — this is an E-E-A-T and citation opportunity.',
+      ],
+      outcomes: [
+        { num: '+38K', lbl: 'Sessions/mo' },
+        { num: '+620', lbl: 'Subscriptions/mo' },
+        { num: '+$96K', lbl: 'Est. annual revenue' },
+      ],
+      layoutWhy: 'Comparison pages convert best with a neutral-framing hero (builds trust), a feature matrix above the fold, and a sticky CTA rail. Social proof specific to each product should appear near the decision point, not the top. The "bottom line" summary box is the highest-intent section and should be gated above the fold on desktop.',
+      wireframe: 'compare',
+    },
+    {
+      id: 'schedule',
+      type: 'Resource / Hub',
+      typeIcon: 'ti-calendar-stats',
+      url: '/study-schedule/step-1',
+      title: 'USMLE Step 1 Study Schedule & Planner',
+      reason: '8,100 searches/mo. Competitors earn 40+ backlinks from this asset type. No UWorld version exists.',
+      impact: '+$54K/yr',
+      impactColor: 'var(--good)',
+      priority: 'High',
+      priorityColor: 'var(--warn)',
+      why: [
+        '"USMLE Step 1 study schedule" gets 8,100 searches/month with extremely high dwell time intent — users spend 7-12 minutes on top-ranking pages. AMBOSS\'s equivalent page has earned 340 referring domains.',
+        'This page type creates a flywheel: students bookmark it, share it on Reddit and SDN, and it generates natural backlinks — the single highest-ROI link-building strategy in this vertical.',
+        'Can serve as an entry point into the UWorld ecosystem for students months before they purchase, dramatically lowering acquisition cost for long-cycle buyers.',
+      ],
+      outcomes: [
+        { num: '+22K', lbl: 'Sessions/mo' },
+        { num: '340+', lbl: 'Backlink potential' },
+        { num: '+$54K', lbl: 'Est. annual revenue' },
+      ],
+      layoutWhy: 'Resource pages need an instant-value hero with a downloadable PDF above the fold. The interactive planner widget should follow — interactive tools increase time-on-page 3× vs static content. Weekly milestone sections work better as accordions than one long scroll. A persistent "Start your free trial" sticky bar converts resource browsers to subscribers.',
+      wireframe: 'schedule',
+    },
+    {
+      id: 'free-trial',
+      type: 'Landing page',
+      typeIcon: 'ti-gift',
+      url: '/free-trial',
+      title: 'Free Trial — Try 120 Questions Free',
+      reason: '"UWorld free trial" gets 6,200 searches/mo. Current free offering is buried 4 clicks deep.',
+      impact: '+$72K/yr',
+      impactColor: 'var(--good)',
+      priority: 'High',
+      priorityColor: 'var(--warn)',
+      why: [
+        'Social listening found 278 Reddit/forum mentions asking "does UWorld have a free trial?" — the answer is yes, but the page doesn\'t exist as a standalone destination. Competitors have dedicated /free-trial URLs ranking in positions 1–3.',
+        '"Free trial" queries have the highest signup-intent of any top-of-funnel keyword. A dedicated landing page with a frictionless email-gate converts at 3–5× the rate of the homepage.',
+        'This page resolves the #3 social complaint about pricing by letting users experience value before committing. Reduces price objection in the conversion funnel.',
+      ],
+      outcomes: [
+        { num: '+18K', lbl: 'Sessions/mo' },
+        { num: '+4.2%', lbl: 'Trial → paid lift' },
+        { num: '+$72K', lbl: 'Est. annual revenue' },
+      ],
+      layoutWhy: 'Free trial pages work with a single-column conversion layout: hero benefit headline, 3-bullet value prop, prominent email field, and social proof (student count + star rating) directly below the CTA. Remove all navigation distractions. Mobile must be tap-optimized — keyboard should not push CTA off-screen.',
+      wireframe: 'free-trial',
+    },
+    {
+      id: 'img',
+      type: 'Audience segment',
+      typeIcon: 'ti-world',
+      url: '/international/img-usmle',
+      title: 'USMLE for International Medical Graduates',
+      reason: '5,200 searches/mo, +52% YoY trend. IMGs represent 27% of USMLE test-takers — no dedicated page.',
+      impact: '+$38K/yr',
+      impactColor: 'var(--good)',
+      priority: 'Medium',
+      priorityColor: 'var(--info)',
+      why: [
+        'International Medical Graduates (IMGs) make up 27% of all USMLE candidates yet there is no IMG-specific content on this site. These users have distinct needs: longer prep timelines, visa considerations, residency match rates.',
+        'Competitor AMBOSS has an IMG-dedicated section earning 180 referring domains and ranking for 60+ long-tail IMG queries. This audience segment skews toward annual plan purchases (+22% higher LTV vs US students).',
+        'Content can be locally adapted for specific country markets (India, Pakistan, Philippines) where medical education density is highest — enabling targeted paid acquisition.',
+      ],
+      outcomes: [
+        { num: '+14K', lbl: 'Sessions/mo' },
+        { num: '+22%', lbl: 'LTV vs avg' },
+        { num: '+$38K', lbl: 'Est. annual revenue' },
+      ],
+      layoutWhy: 'Audience segment pages need strong identity mirroring at the hero — the visitor should immediately see themselves reflected. A "how it works for IMGs" section with a timeline builds trust. Testimonials must be from IMG students specifically. A FAQ addressing visa, ECFMGs, and residency match converts better than generic copy.',
+      wireframe: 'img',
+    },
+    {
+      id: 'passfail',
+      type: 'Thought leadership',
+      typeIcon: 'ti-news',
+      url: '/resources/step-1-pass-fail-impact',
+      title: 'USMLE Step 1 Pass/Fail: What It Means for Your Residency',
+      reason: '2,900 searches/mo, +340% YoY growth. No competitor owns it yet — first-mover opportunity.',
+      impact: '+$18K/yr',
+      impactColor: 'var(--good)',
+      priority: 'Medium',
+      priorityColor: 'var(--info)',
+      why: [
+        'USMLE Step 1 went pass/fail in 2022 and students are still actively researching its residency implications. This query is growing +340% YoY and no single authoritative resource owns the conversation.',
+        'First-mover advantage: the first high-quality, well-cited article to rank for this cluster will earn significant natural backlinks from medical schools, Reddit, and student blogs.',
+        'This content signals E-E-A-T expertise to Google — a medical education company explaining Step 1 policy is exactly the type of authoritative content that improves domain-wide rankings.',
+      ],
+      outcomes: [
+        { num: '+8K', lbl: 'Sessions/mo' },
+        { num: '60+', lbl: 'Natural backlinks' },
+        { num: '+$18K', lbl: 'Est. annual revenue' },
+      ],
+      layoutWhy: 'Thought leadership articles convert best with a clear authoritative structure: expert byline prominent at top, TL;DR summary box for scanners, structured H2/H3 hierarchy for featured snippet targeting, and inline CTAs after key sections (not just at the end). A "what this means for your prep" section bridges the article to commercial intent.',
+      wireframe: 'article',
+    },
+    {
+      id: 'pricing-calc',
+      type: 'Interactive tool',
+      typeIcon: 'ti-calculator',
+      url: '/pricing/cost-calculator',
+      title: 'Study Cost Calculator — Compare Prep Programs',
+      reason: 'Interactive tools earn 3× more backlinks than static pages. Addresses "is UWorld worth it?" objection (534 social mentions).',
+      impact: '+$26K/yr',
+      impactColor: 'var(--good)',
+      priority: 'Medium',
+      priorityColor: 'var(--info)',
+      why: [
+        'The #1 negative sentiment in social listening (534 mentions) is price perception. A cost-per-question calculator that contextualizes UWorld\'s pricing against pass rates, time saved, and retake costs directly addresses this objection at the bottom of the funnel.',
+        'Interactive calculators earn an average of 3.2× more backlinks than equivalent static content (BuzzSumo 2024 study). Med-prep Reddit communities frequently share calculation tools.',
+        'The tool naturally captures high-intent leads — anyone using a cost calculator is actively evaluating purchase. Lead capture after result display has a 34% average opt-in rate in this content category.',
+      ],
+      outcomes: [
+        { num: '+11K', lbl: 'Sessions/mo' },
+        { num: '34%', lbl: 'Lead capture rate' },
+        { num: '+$26K/yr', lbl: 'Attributed revenue' },
+      ],
+      layoutWhy: 'Calculator pages work best single-column with progressive disclosure — show inputs one at a time to reduce intimidation. The result panel must be visually dramatic (large number, color-coded) to feel rewarding. A breakdown of the calculation builds trust. The CTA appears immediately after the result with urgency framing ("your ideal plan").',
+      wireframe: 'calculator',
+    },
+  ];
+
+  // ── Wireframe renderers ───────────────────────────────────────────────
+  function wfNavBar() {
+    return `<div class="wf-bar"><div class="wf-logo"></div><div class="wf-nav-links"><div class="wf-nav-link"></div><div class="wf-nav-link"></div><div class="wf-nav-link"></div></div><div class="wf-btn-sm" style="margin-left:12px;"></div></div>`;
+  }
+  const WIREFRAMES = {
+    compare: `<div class="wf-wrap">${wfNavBar()}
+      <div class="wf-hero" style="background:linear-gradient(135deg,rgba(212,165,116,0.05),transparent);">
+        <span class="wf-label">Neutral hero — builds trust</span>
+        <div class="wf-h1"></div><div class="wf-h2"></div><div class="wf-sub"></div>
+        <div style="display:flex;gap:6px;margin-top:6px;font-size:9px;color:rgba(255,255,255,0.2);">
+          <div style="width:80px;height:22px;background:rgba(212,165,116,0.25);border-radius:4px;"></div>
+          <div style="width:80px;height:22px;background:rgba(255,255,255,0.06);border-radius:4px;border:1px solid rgba(255,255,255,0.08);"></div>
+        </div>
+      </div>
+      <div class="wf-section">
+        <span class="wf-label">Feature matrix — above the fold</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;">
+          <div style="height:8px;background:rgba(255,255,255,0.1);border-radius:2px;"></div>
+          <div style="height:8px;background:rgba(212,165,116,0.25);border-radius:2px;"></div>
+          <div style="height:8px;background:rgba(255,255,255,0.07);border-radius:2px;"></div>
+        </div>
+        ${[1,2,3,4].map(()=>`<div class="wf-table-row"><div class="wf-tc"></div><div class="wf-tc hi"></div><div class="wf-tc"></div></div>`).join('')}
+      </div>
+      <div class="wf-section">
+        <span class="wf-label">Social proof per product</span>
+        <div class="wf-cols">
+          <div class="wf-box"><div class="wf-box-head"></div><div class="wf-star-row">${[1,2,3,4,5].map(()=>`<div class="wf-star"></div>`).join('')}</div><div class="wf-row"></div><div class="wf-row dark"></div></div>
+          <div class="wf-box"><div class="wf-box-head" style="background:rgba(212,165,116,0.2);"></div><div class="wf-star-row">${[1,2,3,4,5].map(()=>`<div class="wf-star" style="opacity:.3;"></div>`).join('')}</div><div class="wf-row"></div><div class="wf-row dark"></div></div>
+        </div>
+      </div>
+      <div class="wf-section" style="background:rgba(212,165,116,0.05);">
+        <span class="wf-label">"Bottom line" verdict box — highest-intent</span>
+        <div style="height:48px;background:rgba(212,165,116,0.12);border-radius:6px;border:1px solid rgba(212,165,116,0.2);"></div>
+      </div>
+    </div>`,
+
+    schedule: `<div class="wf-wrap">${wfNavBar()}
+      <div class="wf-hero">
+        <span class="wf-label">Instant-value hero + PDF download CTA</span>
+        <div class="wf-h1"></div><div class="wf-sub"></div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <div style="width:110px;height:24px;background:rgba(212,165,116,0.3);border-radius:4px;"></div>
+          <div style="width:80px;height:24px;background:rgba(255,255,255,0.06);border-radius:4px;border:1px solid rgba(255,255,255,0.08);"></div>
+        </div>
+      </div>
+      <div class="wf-section">
+        <span class="wf-label">Interactive planner widget — drives engagement</span>
+        <div style="background:rgba(255,255,255,0.03);border-radius:6px;padding:12px;">
+          <div style="display:flex;gap:6px;margin-bottom:8px;">${[1,2,3].map(()=>`<div style="flex:1;height:24px;background:rgba(255,255,255,0.06);border-radius:4px;"></div>`).join('')}</div>
+          <div style="height:36px;background:rgba(212,165,116,0.15);border-radius:5px;"></div>
+        </div>
+      </div>
+      <div class="wf-section">
+        <span class="wf-label">Weekly milestones (accordion)</span>
+        ${[1,2,3].map(i=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><div style="width:20px;height:20px;border-radius:50%;background:${i===1?'rgba(74,222,128,0.2)':'rgba(255,255,255,0.06)'};flex-shrink:0;"></div><div style="flex:1;height:8px;background:rgba(255,255,255,0.07);border-radius:2px;"></div><div style="width:14px;height:14px;background:rgba(255,255,255,0.05);border-radius:2px;flex-shrink:0;"></div></div>`).join('')}
+      </div>
+      <div style="height:40px;background:rgba(212,165,116,0.1);border-top:1px solid rgba(212,165,116,0.15);display:flex;align-items:center;justify-content:center;gap:10px;padding:0 20px;">
+        <div style="height:8px;flex:1;background:rgba(255,255,255,0.07);border-radius:2px;"></div>
+        <div style="width:90px;height:24px;background:rgba(212,165,116,0.3);border-radius:4px;flex-shrink:0;"></div>
+      </div>
+    </div>`,
+
+    'free-trial': `<div class="wf-wrap">${wfNavBar()}
+      <div style="padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;border-bottom:1px solid var(--line);">
+        <span class="wf-label">Single-column conversion layout — no nav distractions</span>
+        <div class="wf-h1" style="width:75%;"></div>
+        <div style="display:flex;gap:6px;">
+          ${[1,2,3].map(()=>`<div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:rgba(74,222,128,0.4);"></div><div style="width:70px;height:7px;background:rgba(255,255,255,0.07);border-radius:2px;"></div></div>`).join('')}
+        </div>
+        <div style="width:70%;display:flex;gap:6px;margin-top:4px;">
+          <div style="flex:1;height:32px;background:rgba(255,255,255,0.06);border-radius:4px;border:1px solid rgba(255,255,255,0.1);"></div>
+          <div style="width:90px;height:32px;background:rgba(212,165,116,0.4);border-radius:4px;flex-shrink:0;"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+          <div class="wf-star-row" style="margin:0;">${[1,2,3,4,5].map(()=>`<div class="wf-star"></div>`).join('')}</div>
+          <div style="width:120px;height:7px;background:rgba(255,255,255,0.06);border-radius:2px;"></div>
+        </div>
+      </div>
+      <div class="wf-section">
+        <span class="wf-label">Sample questions preview</span>
+        ${[1,2].map(()=>`<div style="background:rgba(255,255,255,0.03);border-radius:6px;padding:10px;margin-bottom:6px;"><div style="height:7px;background:rgba(255,255,255,0.08);border-radius:2px;margin-bottom:5px;width:88%;"></div><div style="height:7px;background:rgba(255,255,255,0.05);border-radius:2px;width:62%;"></div></div>`).join('')}
+      </div>
+    </div>`,
+
+    img: `<div class="wf-wrap">${wfNavBar()}
+      <div class="wf-hero" style="background:linear-gradient(135deg,rgba(96,165,250,0.05),transparent);">
+        <span class="wf-label">Identity-mirroring hero — visitor sees themselves</span>
+        <div class="wf-h1"></div><div class="wf-h2" style="width:62%;"></div><div class="wf-sub"></div>
+        <div class="wf-cta-row"><div class="wf-cta"></div><div class="wf-cta ghost"></div></div>
+      </div>
+      <div class="wf-section">
+        <span class="wf-label">How it works for IMGs — timeline</span>
+        <div style="display:flex;gap:0;margin-top:10px;">
+          ${[1,2,3,4].map((i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:20px;height:20px;border-radius:50%;background:rgba(212,165,116,${0.1+i*0.07});"></div><div style="height:7px;width:80%;background:rgba(255,255,255,0.06);border-radius:2px;"></div><div style="height:6px;width:60%;background:rgba(255,255,255,0.04);border-radius:2px;"></div></div>`).join('')}
+        </div>
+      </div>
+      <div class="wf-section">
+        <span class="wf-label">IMG testimonials — trust building</span>
+        <div class="wf-cols">
+          ${[1,2].map(()=>`<div class="wf-box"><div style="display:flex;gap:6px;align-items:center;margin-bottom:7px;"><div class="wf-avatar"></div><div style="flex:1;"><div style="height:7px;background:rgba(255,255,255,0.1);border-radius:2px;margin-bottom:3px;"></div><div style="height:6px;background:rgba(255,255,255,0.05);border-radius:2px;width:65%;"></div></div></div><div class="wf-row"></div><div class="wf-row dark"></div></div>`).join('')}
+        </div>
+      </div>
+      <div class="wf-section">
+        <span class="wf-label">IMG-specific FAQ</span>
+        ${[1,2,3].map(()=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><div style="flex:1;height:8px;background:rgba(255,255,255,0.07);border-radius:2px;"></div><div style="width:14px;height:14px;background:rgba(255,255,255,0.05);border-radius:50%;flex-shrink:0;"></div></div>`).join('')}
+      </div>
+    </div>`,
+
+    article: `<div class="wf-wrap">${wfNavBar()}
+      <div style="padding:20px;border-bottom:1px solid var(--line);">
+        <span class="wf-label">Expert byline prominent — E-E-A-T signal</span>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;margin-top:8px;">
+          <div class="wf-avatar" style="width:28px;height:28px;"></div>
+          <div><div style="height:7px;width:80px;background:rgba(255,255,255,0.1);border-radius:2px;margin-bottom:3px;"></div><div style="height:6px;width:100px;background:rgba(255,255,255,0.05);border-radius:2px;"></div></div>
+        </div>
+        <div class="wf-h1" style="width:88%;margin-bottom:8px;"></div>
+        <div style="background:rgba(212,165,116,0.07);border-left:3px solid rgba(212,165,116,0.4);border-radius:0 6px 6px 0;padding:8px 10px;margin-top:6px;">
+          <span class="wf-label">TL;DR summary box — scanner-friendly</span>
+          ${[1,2].map(()=>`<div style="height:7px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:5px;"></div>`).join('')}
+        </div>
+      </div>
+      <div class="wf-section">
+        <span class="wf-label">Structured H2 sections — featured snippet targeting</span>
+        ${[1,2,3].map(()=>`<div style="margin-bottom:10px;"><div style="height:9px;width:55%;background:rgba(255,255,255,0.1);border-radius:2px;margin-bottom:6px;"></div><div style="height:7px;background:rgba(255,255,255,0.05);border-radius:2px;margin-bottom:4px;"></div><div style="height:7px;width:80%;background:rgba(255,255,255,0.04);border-radius:2px;"></div></div>`).join('')}
+      </div>
+      <div style="margin:0 12px 12px;background:rgba(212,165,116,0.1);border-radius:6px;padding:10px;border:1px solid rgba(212,165,116,0.15);">
+        <span class="wf-label">Inline CTA — appears after key sections</span>
+        <div style="height:24px;background:rgba(212,165,116,0.3);border-radius:4px;margin-top:6px;"></div>
+      </div>
+    </div>`,
+
+    calculator: `<div class="wf-wrap">${wfNavBar()}
+      <div class="wf-hero">
+        <span class="wf-label">Single-column — progressive disclosure</span>
+        <div class="wf-h1" style="width:70%;"></div><div class="wf-sub"></div>
+      </div>
+      <div class="wf-section">
+        <span class="wf-label">Input steps — one at a time, reduces friction</span>
+        ${[1,2,3].map((i)=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,${i===1?'0.04':'0.02'});border-radius:6px;margin-bottom:6px;border:1px solid rgba(255,255,255,${i===1?'0.08':'0.03'});"><div style="width:20px;height:20px;border-radius:50%;background:rgba(212,165,116,${i===1?'0.3':'0.1'});flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,.3);">${i}</div><div style="flex:1;height:8px;background:rgba(255,255,255,0.06);border-radius:2px;"></div><div style="width:60px;height:22px;background:rgba(255,255,255,0.06);border-radius:4px;border:1px solid rgba(255,255,255,0.08);flex-shrink:0;"></div></div>`).join('')}
+      </div>
+      <div class="wf-section" style="background:rgba(212,165,116,0.04);">
+        <span class="wf-label">Result — visually dramatic, builds conviction</span>
+        <div style="text-align:center;padding:10px 0;">
+          <div style="height:36px;width:50%;background:rgba(212,165,116,0.2);border-radius:6px;margin:0 auto 8px;"></div>
+          <div style="height:7px;width:65%;background:rgba(255,255,255,0.06);border-radius:2px;margin:0 auto;"></div>
+        </div>
+        <div style="height:30px;background:rgba(212,165,116,0.3);border-radius:5px;margin-top:10px;"></div>
+      </div>
+    </div>`,
+  };
+
+  // ── Render suggested grid ─────────────────────────────────────────────
+  function renderSuggestedGrid() {
+    const grid = document.getElementById('suggestedGrid');
+    if (!grid) return;
+    grid.innerHTML = SUGGESTED_PAGES.map(p => `
+      <div class="sugg-card" data-id="${p.id}" role="button" tabindex="0">
+        <div class="sugg-type"><i class="ti ${p.typeIcon}"></i>${p.type}</div>
+        <div class="sugg-url">${p.url}</div>
+        <div class="sugg-title">${p.title}</div>
+        <div class="sugg-reason">${p.reason}</div>
+        <div class="sugg-footer">
+          <span class="sugg-impact" style="color:${p.impactColor};">${p.impact}</span>
+          <span class="pill" style="background:${p.priorityColor}22;color:${p.priorityColor};font-size:10px;padding:2px 8px;">${p.priority}</span>
+          <span class="sugg-cta"><i class="ti ti-arrow-right"></i>View brief</span>
+        </div>
+      </div>
+    `).join('');
+    grid.querySelectorAll('.sugg-card').forEach(card => {
+      card.addEventListener('click', () => openBrief(card.dataset.id));
+      card.addEventListener('keydown', e => e.key === 'Enter' && openBrief(card.dataset.id));
+    });
+  }
+
+  // ── Open brief panel ──────────────────────────────────────────────────
+  function openBrief(id) {
+    const p = SUGGESTED_PAGES.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('briefType').textContent  = p.type;
+    document.getElementById('briefUrl').textContent   = p.url;
+    document.getElementById('briefTitle').textContent = p.title;
+
+    const body = document.getElementById('briefBody');
+    body.innerHTML = `
+      <!-- Why needed -->
+      <div>
+        <div class="panel-section-title"><i class="ti ti-bulb"></i>Why this page is needed</div>
+        ${p.why.map(w => `<p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:10px;">${w}</p>`).join('')}
+      </div>
+
+      <!-- Expected outcomes -->
+      <div>
+        <div class="panel-section-title"><i class="ti ti-chart-arrows-vertical"></i>Expected outcomes</div>
+        <div class="outcome-grid">
+          ${p.outcomes.map(o => `
+            <div class="outcome-tile">
+              <div class="outcome-num" style="color:var(--good);">${o.num}</div>
+              <div class="outcome-lbl">${o.lbl}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Wireframe -->
+      <div>
+        <div class="panel-section-title"><i class="ti ti-layout-grid"></i>Recommended page layout (wireframe)</div>
+        ${WIREFRAMES[p.wireframe] || ''}
+      </div>
+
+      <!-- Why this layout -->
+      <div>
+        <div class="panel-section-title"><i class="ti ti-info-circle"></i>Why this layout</div>
+        <p style="font-size:13px;color:var(--text-2);line-height:1.7;">${p.layoutWhy}</p>
+      </div>
+
+      <!-- Action row -->
+      <div style="display:flex;gap:10px;padding-top:8px;border-top:1px solid var(--line);">
+        <button class="btn btn-primary" style="flex:1;"><i class="ti ti-sparkles"></i>Generate full brief</button>
+        <button class="btn"><i class="ti ti-edit"></i>Add to content plan</button>
+        <button class="btn"><i class="ti ti-download"></i>Export</button>
+      </div>
+    `;
+
+    document.getElementById('briefOverlay').classList.add('open');
+    document.getElementById('briefPanel').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeBrief() {
+    document.getElementById('briefOverlay').classList.remove('open');
+    document.getElementById('briefPanel').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Personalize from URL param
+    const params = new URLSearchParams(location.search);
+    const site = params.get('site') || 'uworld-medical';
+    document.getElementById('siteName').textContent = site + '.com';
+
+    const labels = Array.from({length: 30}, (_, i) => `D${i+1}`);
+    const data = labels.map((_, i) => 24000 + Math.sin(i/4)*3000 + i*200 + Math.random()*2500);
+    new Chart(document.getElementById('siteTraffic'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{ label: 'Sessions', data, borderColor: '#D4A574', backgroundColor: 'rgba(212,165,116,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => (c.parsed.y/1000).toFixed(1) + 'K sessions' } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 10 }, maxTicksLimit: 10 } },
+          y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { size: 11 }, callback: v => (v/1000).toFixed(0) + 'K' } }
+        }
+      }
+    });
+
+    // Render suggested pages grid
+    renderSuggestedGrid();
+
+    // Wire up close handlers
+    document.getElementById('briefClose').addEventListener('click', closeBrief);
+    document.getElementById('briefOverlay').addEventListener('click', closeBrief);
+    document.addEventListener('keydown', e => e.key === 'Escape' && closeBrief());
+  });
+</script>
+
+</body>
+</html>
+

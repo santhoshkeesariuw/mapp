@@ -1,0 +1,1041 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Page detail · UWorld</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.PAGE_META = { page: 'sites', title: 'Page detail' };</script>
+<style>
+/* ── Tab bar ── */
+.detail-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--line);
+  margin: 24px 0;
+}
+.detail-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border: none;
+  background: none;
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.detail-tab:hover { color: var(--text-2); }
+.detail-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.detail-tab i { font-size: 15px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Heatmap ── */
+.heatmap-wrap { background: var(--ink-2); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+.heatmap-page {
+  position: relative;
+  width: 100%;
+  background: #141929;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  user-select: none;
+}
+.mock-nav-bar { height: 42px; background: rgba(255,255,255,0.03); display: flex; align-items: center; padding: 0 16px; gap: 16px; border-bottom: 1px solid var(--line); }
+.mock-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.12); }
+.mock-hero-sec { height: 108px; background: linear-gradient(135deg, rgba(212,165,116,0.06) 0%, rgba(108,99,255,0.06) 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.mock-h1 { width: 52%; height: 13px; background: rgba(255,255,255,0.14); border-radius: 4px; }
+.mock-sub { width: 38%; height: 8px; background: rgba(255,255,255,0.07); border-radius: 4px; }
+.mock-btn-sim { width: 90px; height: 26px; background: rgba(212,165,116,0.22); border-radius: 5px; }
+.mock-body-sec { display: flex; gap: 10px; padding: 14px; min-height: 130px; }
+.mock-main-c { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+.mock-side-c { width: 110px; display: flex; flex-direction: column; gap: 7px; }
+.mock-ln { height: 7px; background: rgba(255,255,255,0.07); border-radius: 3px; }
+.mock-ln.s { width: 65%; }
+.mock-bx { height: 54px; background: rgba(255,255,255,0.04); border-radius: 5px; }
+.mock-cta-sec { height: 56px; background: rgba(212,165,116,0.04); display: flex; align-items: center; justify-content: center; gap: 10px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.mock-cta-b { width: 110px; height: 28px; background: rgba(212,165,116,0.18); border-radius: 5px; }
+.mock-foot { height: 38px; background: rgba(0,0,0,0.18); }
+.heat-blob { position: absolute; border-radius: 50%; pointer-events: none; mix-blend-mode: screen; }
+.heat-legend { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 11px; color: var(--text-3); }
+.heat-gradient { width: 100px; height: 7px; border-radius: 4px; background: linear-gradient(to right, rgba(96,165,250,0.7), rgba(251,191,36,0.9), rgba(248,113,113,1)); }
+.scroll-bar-bg { height: 5px; background: var(--ink-3); border-radius: 3px; overflow: hidden; margin-top: 3px; }
+.scroll-bar-fill { height: 100%; border-radius: 3px; }
+
+/* ── Audit items ── */
+.audit-group { margin-bottom: 18px; }
+.audit-group-head { display: flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.audit-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--ink-3); border-radius: 8px; margin-bottom: 5px; }
+.audit-ic { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; font-size: 10px; }
+.ai-pass { background: var(--good-soft); color: var(--good); }
+.ai-warn { background: var(--warn-soft); color: var(--warn); }
+.ai-fail { background: var(--bad-soft); color: var(--bad); }
+.audit-text { font-size: 13px; color: var(--text); }
+.audit-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; line-height: 1.45; }
+
+/* ── CWV ── */
+.cwv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.cwv-card { background: var(--ink-2); border: 1px solid var(--line); border-radius: 10px; padding: 20px; text-align: center; }
+.cwv-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-3); margin-bottom: 10px; }
+.cwv-val { font-size: 30px; font-weight: 700; margin-bottom: 6px; }
+.cwv-unit { font-size: 14px; font-weight: 400; }
+.cwv-badge { font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 20px; display: inline-block; }
+
+/* ── Funnel ── */
+.funnel-step { margin-bottom: 10px; }
+.funnel-bar-track { flex: 1; height: 34px; background: var(--ink-3); border-radius: 6px; overflow: hidden; }
+.funnel-bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.7); }
+
+/* ── SEO score ring ── */
+.score-ring-wrap { position: relative; width: 96px; height: 96px; flex-shrink: 0; }
+.score-ring-wrap svg { transform: rotate(-90deg); }
+.score-ring-num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.score-big { font-size: 26px; font-weight: 700; line-height: 1; }
+.score-denom { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+
+/* ── Responsive grid helpers ── */
+.pd-grid-main    { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+.pd-grid-heatmap { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
+.pd-grid-seo     { display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start; }
+.pd-grid-2       { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <main class="main">
+    <div class="page fade-in">
+
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">
+            <a href="sites.html" style="color: var(--text-3);">Sites</a>
+            <span style="margin: 0 5px; color: var(--text-3);">/</span>
+            <a id="siteLink" href="site-detail.html" style="color: var(--text-3);">uworld-medical.com</a>
+            <span style="margin: 0 5px; color: var(--text-3);">/</span>
+            <span id="urlCrumb" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent);">/</span>
+          </div>
+          <h1 class="page-title" id="pageTitle">Page detail</h1>
+          <p class="page-sub">
+            <span id="pageSite" style="color: var(--text-3);">uworld-medical.com</span>
+            <span style="margin: 0 8px; color: var(--line-3);">·</span>
+            <span id="pageUrl" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent);">/</span>
+          </p>
+        </div>
+        <div class="page-actions">
+          <button class="btn"><i class="ti ti-external-link"></i>Visit page</button>
+          <button class="btn"><i class="ti ti-edit"></i>Edit content</button>
+          <button class="btn btn-primary"><i class="ti ti-sparkles"></i>AI optimize</button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Sessions · 30d</div>
+          <div class="metric-value" id="m-traffic">84K</div>
+          <div class="metric-delta up"><i class="ti ti-trending-up"></i>+18%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Avg position</div>
+          <div class="metric-value" id="m-rank">#2</div>
+          <div class="metric-delta up"><i class="ti ti-trending-up"></i>+0.8</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Conversion rate</div>
+          <div class="metric-value" id="m-conv">5.4%</div>
+          <div class="metric-delta up"><i class="ti ti-trending-up"></i>+0.4pp</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">AI score</div>
+          <div class="metric-value" id="m-score" style="color: var(--good);">94</div>
+          <div class="metric-delta up"><i class="ti ti-check"></i>healthy</div>
+        </div>
+      </div>
+
+      <!-- ── Tab bar ── -->
+      <div class="detail-tabs">
+        <button class="detail-tab" data-tab="overview"><i class="ti ti-layout-dashboard"></i>Overview</button>
+        <button class="detail-tab" data-tab="heatmap"><i class="ti ti-flame"></i>Heatmap</button>
+        <button class="detail-tab" data-tab="seo"><i class="ti ti-search"></i>SEO Audit</button>
+        <button class="detail-tab" data-tab="performance"><i class="ti ti-gauge"></i>Performance</button>
+        <button class="detail-tab" data-tab="conversion"><i class="ti ti-arrows-shuffle"></i>Conversion</button>
+        <button class="detail-tab" data-tab="research"><i class="ti ti-world-search"></i>Research</button>
+      </div>
+
+      <!-- ════ OVERVIEW ════ -->
+      <div id="tab-overview" class="tab-panel">
+        <div class="pd-grid-main">
+          <div class="card" style="margin: 0;">
+            <div class="card-head">
+              <div class="card-title"><i class="ti ti-chart-area-line"></i>Traffic · last 30 days</div>
+              <div class="seg-tabs">
+                <button class="seg-tab">7d</button>
+                <button class="seg-tab on">30d</button>
+                <button class="seg-tab">90d</button>
+              </div>
+            </div>
+            <div class="chart-wrap lg"><canvas id="overviewChart"></canvas></div>
+          </div>
+          <div class="card" style="margin: 0;">
+            <div class="card-head"><div class="card-title"><i class="ti ti-award"></i>Top keywords</div></div>
+            <table>
+              <thead><tr><th>Keyword</th><th class="right">Pos</th><th class="right">Vol</th></tr></thead>
+              <tbody id="kwTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="briefing" style="margin-top: 20px;">
+          <div class="briefing-head">
+            <span class="briefing-tag"><span class="pulse"></span>AI insights for this page</span>
+            <span class="briefing-time">2 opportunities detected</span>
+          </div>
+          <div class="alerts">
+            <div class="alert-row info">
+              <div class="alert-num">1</div>
+              <div class="alert-body">
+                <div class="alert-title">Content freshness gap — last updated 14 months ago</div>
+                <div class="alert-text">3 competing pages refreshed targeting same keyword cluster. Projected lift from a content refresh: <b>+12% sessions/mo</b>. Window of opportunity: ~3 weeks before competitor content ages in.</div>
+              </div>
+            </div>
+            <div class="alert-row info">
+              <div class="alert-num">2</div>
+              <div class="alert-body">
+                <div class="alert-title">Missing FAQ schema — 8 featured snippet opportunities</div>
+                <div class="alert-text">Page has no structured data. Adding FAQ schema could capture position #0 for 8 queries totalling <b>~34K monthly searches</b>. Estimated CTR lift: +2.4pp.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ HEATMAP ════ -->
+      <div id="tab-heatmap" class="tab-panel">
+        <div class="metrics" style="margin-bottom: 20px;">
+          <div class="metric"><div class="metric-label">Sessions recorded</div><div class="metric-value">2,847</div><div class="metric-delta up"><i class="ti ti-check"></i>last 30d</div></div>
+          <div class="metric"><div class="metric-label">Avg clicks / session</div><div class="metric-value">3.2</div><div class="metric-delta up"><i class="ti ti-trending-up"></i>+0.4</div></div>
+          <div class="metric"><div class="metric-label">Avg scroll depth</div><div class="metric-value">62<span class="unit">%</span></div><div class="metric-delta down"><i class="ti ti-trending-down"></i>−4pp</div></div>
+          <div class="metric"><div class="metric-label">Rage clicks</div><div class="metric-value">84</div><div class="metric-delta down"><i class="ti ti-alert-circle"></i>investigate</div></div>
+        </div>
+
+        <div class="pd-grid-heatmap">
+          <div class="heatmap-wrap">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <div style="font-weight: 600; font-size: 13px;">Click heatmap</div>
+              <div class="seg-tabs">
+                <button class="seg-tab on">Clicks</button>
+                <button class="seg-tab">Scroll</button>
+                <button class="seg-tab">Move</button>
+              </div>
+            </div>
+            <div class="heatmap-page">
+              <div class="mock-nav-bar">
+                <div class="mock-dot"></div>
+                <div class="mock-dot"></div>
+                <div class="mock-dot"></div>
+                <div style="margin-left:auto;width:56px;height:20px;background:rgba(212,165,116,0.2);border-radius:4px;"></div>
+              </div>
+              <div class="mock-hero-sec">
+                <div class="mock-h1"></div>
+                <div class="mock-sub"></div>
+                <div class="mock-btn-sim"></div>
+              </div>
+              <div class="mock-body-sec">
+                <div class="mock-main-c">
+                  <div class="mock-ln"></div>
+                  <div class="mock-ln s"></div>
+                  <div class="mock-ln"></div>
+                  <div class="mock-bx"></div>
+                  <div class="mock-ln"></div>
+                  <div class="mock-ln s"></div>
+                </div>
+                <div class="mock-side-c">
+                  <div class="mock-bx"></div>
+                  <div class="mock-ln"></div>
+                  <div class="mock-ln s"></div>
+                  <div class="mock-bx" style="background:rgba(212,165,116,0.08);"></div>
+                </div>
+              </div>
+              <div class="mock-cta-sec">
+                <div class="mock-cta-b"></div>
+                <div style="width:72px;height:28px;background:rgba(255,255,255,0.05);border-radius:5px;"></div>
+              </div>
+              <div class="mock-foot"></div>
+
+              <!-- heat blobs: hero CTA is hottest -->
+              <div class="heat-blob" style="left:32%;top:54px;width:110px;height:62px;background:radial-gradient(ellipse,rgba(255,30,0,.58),rgba(255,110,0,.3) 42%,transparent 70%);"></div>
+              <div class="heat-blob" style="left:30%;top:50px;width:68px;height:44px;background:radial-gradient(ellipse,rgba(255,0,0,.7),transparent 70%);"></div>
+              <!-- nav CTA -->
+              <div class="heat-blob" style="right:10px;top:4px;width:64px;height:34px;background:radial-gradient(ellipse,rgba(251,191,36,.5),transparent 70%);"></div>
+              <!-- body content mid -->
+              <div class="heat-blob" style="left:14%;top:168px;width:72px;height:52px;background:radial-gradient(ellipse,rgba(251,191,36,.4),transparent 70%);"></div>
+              <!-- side box -->
+              <div class="heat-blob" style="right:6%;top:156px;width:58px;height:46px;background:radial-gradient(ellipse,rgba(251,191,36,.32),transparent 70%);"></div>
+              <!-- CTA section (primary CTA) -->
+              <div class="heat-blob" style="left:26%;bottom:50px;width:130px;height:46px;background:radial-gradient(ellipse,rgba(255,30,0,.62),rgba(255,100,0,.38) 40%,transparent 70%);"></div>
+              <div class="heat-blob" style="left:24%;bottom:52px;width:76px;height:32px;background:radial-gradient(ellipse,rgba(255,0,0,.72),transparent 70%);"></div>
+              <!-- secondary CTA -->
+              <div class="heat-blob" style="left:56%;bottom:50px;width:60px;height:38px;background:radial-gradient(ellipse,rgba(96,165,250,.28),transparent 70%);"></div>
+              <!-- low-engagement footer -->
+              <div class="heat-blob" style="left:20%;bottom:6px;width:44px;height:22px;background:radial-gradient(ellipse,rgba(96,165,250,.18),transparent 70%);"></div>
+            </div>
+            <div class="heat-legend">
+              <div class="heat-gradient"></div>
+              <span>Low</span>
+              <span style="margin-left:auto;">High</span>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="card" style="margin:0;">
+              <div class="card-head" style="margin-bottom:12px;"><div class="card-title"><i class="ti ti-arrow-bar-down"></i>Scroll depth</div></div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--text-2);">0 – 25%  (above fold)</span><span style="font-weight:600;">100%</span></div>
+                  <div class="scroll-bar-bg"><div class="scroll-bar-fill" style="width:100%;background:var(--good);"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--text-2);">25 – 50%  (mid page)</span><span style="font-weight:600;">78%</span></div>
+                  <div class="scroll-bar-bg"><div class="scroll-bar-fill" style="width:78%;background:var(--good);"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--text-2);">50 – 75%  (lower mid)</span><span style="font-weight:600;">52%</span></div>
+                  <div class="scroll-bar-bg"><div class="scroll-bar-fill" style="width:52%;background:var(--warn);"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--text-2);">75 – 100%  (bottom)</span><span style="font-weight:600;">24%</span></div>
+                  <div class="scroll-bar-bg"><div class="scroll-bar-fill" style="width:24%;background:var(--bad);"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin:0;">
+              <div class="card-head" style="margin-bottom:10px;"><div class="card-title"><i class="ti ti-device-desktop"></i>Device split</div></div>
+              <div style="display:flex;align-items:center;justify-content:center;height:120px;">
+                <canvas id="devicePie" width="120" height="120"></canvas>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:12px;">
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:9px;height:9px;border-radius:2px;background:var(--accent);"></div><span style="flex:1;color:var(--text-2);">Desktop</span><span style="font-weight:600;">48%</span></div>
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:9px;height:9px;border-radius:2px;background:#6c63ff;"></div><span style="flex:1;color:var(--text-2);">Mobile</span><span style="font-weight:600;">38%</span></div>
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:9px;height:9px;border-radius:2px;background:var(--good);"></div><span style="flex:1;color:var(--text-2);">Tablet</span><span style="font-weight:600;">14%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ SEO AUDIT ════ -->
+      <div id="tab-seo" class="tab-panel">
+        <div class="pd-grid-seo">
+          <!-- Score panel -->
+          <div>
+            <div class="card" style="margin:0;text-align:center;padding:24px 16px;">
+              <div style="display:flex;justify-content:center;margin-bottom:12px;">
+                <div class="score-ring-wrap">
+                  <svg width="96" height="96" viewBox="0 0 96 96">
+                    <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+                    <circle cx="48" cy="48" r="40" fill="none" stroke="var(--warn)" stroke-width="8" stroke-linecap="round"
+                      stroke-dasharray="251.3" stroke-dashoffset="50.3"/>
+                  </svg>
+                  <div class="score-ring-num">
+                    <span class="score-big" style="color:var(--warn);" id="seoScore">80</span>
+                    <span class="score-denom">/ 100</span>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size:12px;color:var(--text-3);">SEO health score</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;">
+                <span style="font-size:12px;color:var(--bad);">Critical</span>
+                <span style="font-size:20px;font-weight:700;color:var(--bad);">2</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;">
+                <span style="font-size:12px;color:var(--warn);">Warnings</span>
+                <span style="font-size:20px;font-weight:700;color:var(--warn);">4</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;">
+                <span style="font-size:12px;color:var(--good);">Passed</span>
+                <span style="font-size:20px;font-weight:700;color:var(--good);">18</span>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;margin-top:12px;justify-content:center;"><i class="ti ti-sparkles"></i>Auto-fix with AI</button>
+          </div>
+
+          <!-- Issues list -->
+          <div>
+            <div class="audit-group">
+              <div class="audit-group-head" style="color:var(--bad);"><i class="ti ti-circle-x"></i>Critical issues</div>
+              <div class="audit-row">
+                <div class="audit-ic ai-fail"><i class="ti ti-x"></i></div>
+                <div>
+                  <div class="audit-text">Missing canonical tag</div>
+                  <div class="audit-sub">Duplicate content risk — 3 similar URLs detected. Add <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:3px;">rel=canonical</code> pointing to this page to consolidate ranking signals.</div>
+                </div>
+              </div>
+              <div class="audit-row">
+                <div class="audit-ic ai-fail"><i class="ti ti-x"></i></div>
+                <div>
+                  <div class="audit-text">Meta description too short (48 chars, target 120–160)</div>
+                  <div class="audit-sub">Current: "Practice USMLE questions free." — missing primary keyword and value proposition. Short descriptions cut off in SERPs and reduce CTR.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="audit-group">
+              <div class="audit-group-head" style="color:var(--warn);"><i class="ti ti-alert-triangle"></i>Warnings</div>
+              <div class="audit-row">
+                <div class="audit-ic ai-warn"><i class="ti ti-alert-triangle"></i></div>
+                <div>
+                  <div class="audit-text">H1 not aligned with primary keyword</div>
+                  <div class="audit-sub">H1: "Free Practice Questions" · Target KW: "USMLE Step 1 QBank". Partial match only — aligning H1 to target KW typically lifts organic CTR by 4–8%.</div>
+                </div>
+              </div>
+              <div class="audit-row">
+                <div class="audit-ic ai-warn"><i class="ti ti-alert-triangle"></i></div>
+                <div>
+                  <div class="audit-text">Keyword density below threshold — 0.6% (target 1–2%)</div>
+                  <div class="audit-sub">Primary keyword appears 4× in 682 words. Add 4–6 more natural mentions in body copy, subheadings, and image alt text.</div>
+                </div>
+              </div>
+              <div class="audit-row">
+                <div class="audit-ic ai-warn"><i class="ti ti-alert-triangle"></i></div>
+                <div>
+                  <div class="audit-text">No FAQ schema markup</div>
+                  <div class="audit-sub">8 queries have featured snippet potential. Adding FAQ schema could capture position #0 and significantly increase organic CTR.</div>
+                </div>
+              </div>
+              <div class="audit-row">
+                <div class="audit-ic ai-warn"><i class="ti ti-alert-triangle"></i></div>
+                <div>
+                  <div class="audit-text">4 images missing alt attributes</div>
+                  <div class="audit-sub">Images without alt text miss Google Image search traffic and reduce accessibility score. AI can auto-generate alt text for all 4.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="audit-group">
+              <div class="audit-group-head" style="color:var(--good);"><i class="ti ti-circle-check"></i>Passed</div>
+              <div class="audit-row"><div class="audit-ic ai-pass"><i class="ti ti-check"></i></div><div><div class="audit-text">Title tag present and well-formed (58 chars)</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-pass"><i class="ti ti-check"></i></div><div><div class="audit-text">HTTPS · no mixed-content warnings</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-pass"><i class="ti ti-check"></i></div><div><div class="audit-text">Mobile responsive · viewport meta present</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-pass"><i class="ti ti-check"></i></div><div><div class="audit-text">Open Graph tags present (og:title, og:description, og:image)</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-pass"><i class="ti ti-check"></i></div><div><div class="audit-text">Internal linking · 12 inbound links from other pages</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ PERFORMANCE ════ -->
+      <div id="tab-performance" class="tab-panel">
+        <div class="cwv-grid">
+          <div class="cwv-card">
+            <div class="cwv-lbl">LCP · Largest Contentful Paint</div>
+            <div class="cwv-val" style="color:var(--warn);">2.4<span class="cwv-unit">s</span></div>
+            <div class="cwv-badge" style="background:var(--warn-soft);color:var(--warn);">Needs improvement</div>
+          </div>
+          <div class="cwv-card">
+            <div class="cwv-lbl">INP · Interaction to Next Paint</div>
+            <div class="cwv-val" style="color:var(--good);">142<span class="cwv-unit">ms</span></div>
+            <div class="cwv-badge" style="background:var(--good-soft);color:var(--good);">Good</div>
+          </div>
+          <div class="cwv-card">
+            <div class="cwv-lbl">CLS · Cumulative Layout Shift</div>
+            <div class="cwv-val" style="color:var(--good);">0.04</div>
+            <div class="cwv-badge" style="background:var(--good-soft);color:var(--good);">Good</div>
+          </div>
+        </div>
+
+        <div class="pd-grid-2">
+          <div class="card" style="margin:0;">
+            <div class="card-head"><div class="card-title"><i class="ti ti-speedboat"></i>Lighthouse scores</div></div>
+            <div style="display:flex;justify-content:space-around;padding:12px 0 8px;">
+              <div style="text-align:center;">
+                <div style="font-size:28px;font-weight:700;color:var(--warn);">72</div>
+                <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;">Performance</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:28px;font-weight:700;color:var(--good);">91</div>
+                <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;">Accessibility</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:28px;font-weight:700;color:var(--good);">95</div>
+                <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;">Best practices</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:28px;font-weight:700;color:var(--good);">84</div>
+                <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;">SEO</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="margin:0;">
+            <div class="card-head"><div class="card-title"><i class="ti ti-clock"></i>Load timeline</div></div>
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--text-2);">First Byte (TTFB)</span><span style="font-weight:600;font-family:'JetBrains Mono',monospace;">210ms</span></div>
+                <div style="height:4px;background:var(--ink-3);border-radius:2px;overflow:hidden;"><div style="width:14%;height:100%;background:var(--good);border-radius:2px;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--text-2);">First Contentful Paint</span><span style="font-weight:600;font-family:'JetBrains Mono',monospace;">0.9s</span></div>
+                <div style="height:4px;background:var(--ink-3);border-radius:2px;overflow:hidden;"><div style="width:25%;height:100%;background:var(--good);border-radius:2px;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--text-2);">Largest Contentful Paint</span><span style="font-weight:600;font-family:'JetBrains Mono',monospace;">2.4s</span></div>
+                <div style="height:4px;background:var(--ink-3);border-radius:2px;overflow:hidden;"><div style="width:64%;height:100%;background:var(--warn);border-radius:2px;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--text-2);">Time to Interactive</span><span style="font-weight:600;font-family:'JetBrains Mono',monospace;">3.1s</span></div>
+                <div style="height:4px;background:var(--ink-3);border-radius:2px;overflow:hidden;"><div style="width:82%;height:100%;background:var(--warn);border-radius:2px;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--text-2);">Total Blocking Time</span><span style="font-weight:600;font-family:'JetBrains Mono',monospace;">380ms</span></div>
+                <div style="height:4px;background:var(--ink-3);border-radius:2px;overflow:hidden;"><div style="width:100%;height:100%;background:var(--bad);border-radius:2px;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+          <div class="card-head"><div class="card-title"><i class="ti ti-bolt"></i>Opportunities · estimated savings</div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="audit-row">
+              <div style="min-width:48px;text-align:center;font-size:11px;font-weight:700;color:var(--bad);background:var(--bad-soft);border-radius:6px;padding:4px 0;">−0.8s</div>
+              <div>
+                <div class="audit-text">Eliminate render-blocking resources</div>
+                <div class="audit-sub">3 CSS files blocking FCP. Defer non-critical CSS with media queries or async loading.</div>
+              </div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:48px;text-align:center;font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:4px 0;">−0.6s</div>
+              <div>
+                <div class="audit-text">Compress and resize images</div>
+                <div class="audit-sub">8 images oversized. Convert to WebP + lazy load — estimated savings ~420KB transfer.</div>
+              </div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:48px;text-align:center;font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:4px 0;">−0.4s</div>
+              <div>
+                <div class="audit-text">Reduce unused JavaScript</div>
+                <div class="audit-sub">2 third-party scripts load 84KB of unused code. Tree-shake or defer until after interactive.</div>
+              </div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:48px;text-align:center;font-size:11px;font-weight:700;color:var(--good);background:var(--good-soft);border-radius:6px;padding:4px 0;">−0.2s</div>
+              <div>
+                <div class="audit-text">Enable text compression (gzip / Brotli)</div>
+                <div class="audit-sub">Compression not enabled on 4 JS files. Simple server config change — no code changes required.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ CONVERSION ════ -->
+      <div id="tab-conversion" class="tab-panel">
+        <div class="pd-grid-2">
+          <div class="card" style="margin:0;">
+            <div class="card-head"><div class="card-title"><i class="ti ti-filter"></i>Conversion funnel</div></div>
+            <div style="display:flex;flex-direction:column;gap:10px;padding:4px 0;">
+              <!-- Stage 1 -->
+              <div class="funnel-step">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+                  <div class="funnel-bar-track">
+                    <div class="funnel-bar-fill" style="width:100%;background:var(--accent);">84,200 views</div>
+                  </div>
+                  <div style="min-width:38px;text-align:right;font-size:12px;font-weight:600;">100%</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);">
+                  <span>Page views</span>
+                </div>
+              </div>
+              <!-- Stage 2 -->
+              <div class="funnel-step">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+                  <div class="funnel-bar-track">
+                    <div class="funnel-bar-fill" style="width:62%;background:rgba(212,165,116,0.45);">52,204</div>
+                  </div>
+                  <div style="min-width:38px;text-align:right;font-size:12px;font-weight:600;">62%</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;">
+                  <span style="color:var(--text-3);">Scrolled past 50%</span>
+                  <span style="color:var(--bad);display:flex;align-items:center;gap:3px;"><i class="ti ti-arrow-down" style="font-size:10px;"></i>38% drop</span>
+                </div>
+              </div>
+              <!-- Stage 3 -->
+              <div class="funnel-step">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+                  <div class="funnel-bar-track">
+                    <div class="funnel-bar-fill" style="width:22%;background:rgba(212,165,116,0.32);padding-left:8px;">18.3K</div>
+                  </div>
+                  <div style="min-width:38px;text-align:right;font-size:12px;font-weight:600;">22%</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;">
+                  <span style="color:var(--text-3);">Clicked any CTA</span>
+                  <span style="color:var(--bad);display:flex;align-items:center;gap:3px;"><i class="ti ti-arrow-down" style="font-size:10px;"></i>65% drop</span>
+                </div>
+              </div>
+              <!-- Stage 4 -->
+              <div class="funnel-step">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+                  <div class="funnel-bar-track">
+                    <div class="funnel-bar-fill" style="width:8.9%;background:rgba(212,165,116,0.22);padding-left:8px;">7.5K</div>
+                  </div>
+                  <div style="min-width:38px;text-align:right;font-size:12px;font-weight:600;">8.9%</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;">
+                  <span style="color:var(--text-3);">Reached signup</span>
+                  <span style="color:var(--bad);display:flex;align-items:center;gap:3px;"><i class="ti ti-arrow-down" style="font-size:10px;"></i>59% drop</span>
+                </div>
+              </div>
+              <!-- Stage 5: converted -->
+              <div class="funnel-step">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+                  <div class="funnel-bar-track">
+                    <div class="funnel-bar-fill" style="width:5.4%;background:var(--good);padding-left:8px;color:#0a0e1a;">4.5K</div>
+                  </div>
+                  <div style="min-width:38px;text-align:right;font-size:12px;font-weight:600;color:var(--good);">5.4%</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;">
+                  <span style="color:var(--text-3);">Converted</span>
+                  <span style="color:var(--bad);display:flex;align-items:center;gap:3px;"><i class="ti ti-arrow-down" style="font-size:10px;"></i>39% drop</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="card" style="margin:0;">
+              <div class="card-head"><div class="card-title"><i class="ti ti-cursor-text"></i>CTA performance</div></div>
+              <table>
+                <thead><tr><th>CTA label</th><th class="right">Clicks</th><th class="right">CTR</th></tr></thead>
+                <tbody>
+                  <tr><td>Start free trial</td><td class="num right">6,240</td><td class="num right" style="color:var(--good);font-weight:600;">7.4%</td></tr>
+                  <tr><td>View pricing</td><td class="num right">3,820</td><td class="num right" style="color:var(--warn);font-weight:600;">4.5%</td></tr>
+                  <tr><td>Take practice test</td><td class="num right">2,104</td><td class="num right" style="color:var(--warn);font-weight:600;">2.5%</td></tr>
+                  <tr><td>Learn more</td><td class="num right">980</td><td class="num right" style="color:var(--bad);font-weight:600;">1.2%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card" style="margin:0;">
+              <div class="card-head"><div class="card-title"><i class="ti ti-flask"></i>A/B tests</div></div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="background:var(--ink-3);border-radius:8px;padding:12px 14px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                    <span style="font-size:13px;font-weight:500;">Hero CTA copy</span>
+                    <span class="pill pill-good">Running</span>
+                  </div>
+                  <div style="font-size:11px;color:var(--text-3);">Variant B leading +24% CTR · 68% confidence · 3 days left</div>
+                </div>
+                <div style="background:var(--ink-3);border-radius:8px;padding:12px 14px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                    <span style="font-size:13px;font-weight:500;">Pricing plan highlight</span>
+                    <span class="pill pill-warn">Paused</span>
+                  </div>
+                  <div style="font-size:11px;color:var(--text-3);">Inconclusive after 14d · insufficient traffic to reach significance</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+          <div class="card-head"><div class="card-title"><i class="ti ti-sparkles"></i>AI conversion recommendations</div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="audit-row">
+              <div style="min-width:48px;text-align:center;font-size:11px;font-weight:700;color:var(--good);background:var(--good-soft);border-radius:6px;padding:4px 0;">+41%</div>
+              <div class="audit-text">Move primary CTA above the fold — heatmap shows 65% of users never scroll far enough to reach the current CTA position.</div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:48px;text-align:center;font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:4px 0;">+18%</div>
+              <div class="audit-text">Rewrite hero headline to include "free" and the primary keyword — matches high-intent search query patterns for this audience.</div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:48px;text-align:center;font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:4px 0;">+12%</div>
+              <div class="audit-text">Add social proof bar (student count, pass rate) directly below hero — competitor pages featuring this element convert 12% better on average.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ RESEARCH ════ -->
+      <div id="tab-research" class="tab-panel">
+
+        <!-- Header bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:18px;font-weight:600;letter-spacing:-0.02em;">360° Research Report</div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:4px;">Deep internet audit · last refreshed <span style="color:var(--accent);">2 hours ago</span></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn"><i class="ti ti-refresh"></i>Refresh</button>
+            <button class="btn btn-primary"><i class="ti ti-sparkles"></i>AI Summary</button>
+          </div>
+        </div>
+
+        <!-- Research score strip -->
+        <div class="metrics" style="margin-bottom:24px;">
+          <div class="metric-card">
+            <div class="metric-label">Topic Authority</div>
+            <div class="metric-val">74<span class="unit">/100</span></div>
+            <div class="metric-delta down"><i class="ti ti-trending-down"></i>-6 vs competitors</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Content Depth</div>
+            <div class="metric-val">61<span class="unit">/100</span></div>
+            <div class="metric-delta warn"><i class="ti ti-alert-circle"></i>gaps detected</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">SERP Visibility</div>
+            <div class="metric-val">38<span class="unit">%</span></div>
+            <div class="metric-delta up"><i class="ti ti-trending-up"></i>+4pp this month</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Competitor Gap</div>
+            <div class="metric-val">12<span class="unit"> topics</span></div>
+            <div class="metric-delta down"><i class="ti ti-target-arrow"></i>high priority</div>
+          </div>
+        </div>
+
+        <!-- Row 1: SERP landscape + AI Overview -->
+        <div class="pd-grid-main" style="margin-bottom:20px;">
+          <div class="card" style="margin:0;">
+            <div class="card-head">
+              <div class="card-title"><i class="ti ti-list-search"></i>SERP landscape · primary keyword</div>
+              <span class="pill pill-warn">Position #4</span>
+            </div>
+            <table>
+              <thead><tr><th>#</th><th>Domain</th><th class="right">DA</th><th class="right">Words</th><th class="right">Links</th></tr></thead>
+              <tbody id="serpTable">
+                <tr><td style="color:var(--good);font-weight:700;">1</td><td>amboss.com/usmle-guide</td><td class="right mono" style="color:var(--bad);">81</td><td class="right mono">4,200</td><td class="right mono">312</td></tr>
+                <tr><td style="color:var(--good);font-weight:700;">2</td><td>usmleworld.com/step1</td><td class="right mono" style="color:var(--bad);">77</td><td class="right mono">3,800</td><td class="right mono">284</td></tr>
+                <tr><td style="color:var(--warn);font-weight:700;">3</td><td>kaplan.com/medical/usmle</td><td class="right mono" style="color:var(--warn);">74</td><td class="right mono">5,100</td><td class="right mono">197</td></tr>
+                <tr style="background:var(--accent-soft);"><td style="color:var(--accent);font-weight:700;">4</td><td style="color:var(--accent);">medical.uworld.com ← you</td><td class="right mono" style="color:var(--warn);">71</td><td class="right mono">2,900</td><td class="right mono">143</td></tr>
+                <tr><td>5</td><td>boardvitals.com/usmle</td><td class="right mono">68</td><td class="right mono">2,600</td><td class="right mono">108</td></tr>
+                <tr><td>6</td><td>sketchy.com/usmle-step-1</td><td class="right mono">65</td><td class="right mono">1,900</td><td class="right mono">94</td></tr>
+                <tr><td>7</td><td>reddit.com/r/step1</td><td class="right mono">95</td><td class="right mono">—</td><td class="right mono">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card" style="margin:0;">
+            <div class="card-head"><div class="card-title"><i class="ti ti-robot"></i>Google AI Overview</div></div>
+            <div style="background:var(--ink-3);border-radius:8px;padding:14px;font-size:12px;color:var(--text-2);line-height:1.65;margin-bottom:12px;border-left:3px solid var(--info);">
+              "USMLE Step 1 preparation typically requires 3–6 months of dedicated study. Leading resources include question banks such as UWorld, AMBOSS, and Kaplan Qbank. UWorld is consistently rated highest for question quality and detailed explanations…"
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+              <span style="font-size:11px;color:var(--text-3);">Your page cited in AI Overview:</span>
+              <span class="pill pill-good">Yes · source #2</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-3);line-height:1.6;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;"><i class="ti ti-check" style="color:var(--good);"></i> Cited for pass-rate statistics</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;"><i class="ti ti-check" style="color:var(--good);"></i> Cited for question explanation quality</div>
+              <div style="display:flex;align-items:center;gap:6px;"><i class="ti ti-x" style="color:var(--bad);"></i> Not cited for pricing comparison</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Content gaps + People Also Ask -->
+        <div class="pd-grid-2" style="margin-bottom:20px;">
+          <div class="card" style="margin:0;">
+            <div class="card-head">
+              <div class="card-title"><i class="ti ti-puzzle"></i>Content gaps vs top 3 competitors</div>
+              <span class="pill pill-bad">12 gaps</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div class="audit-row"><div class="audit-ic ai-fail"><i class="ti ti-x"></i></div><div><div class="audit-text">Step 1 vs Step 2 differences — covered by 3/3 competitors, missing here</div><div class="audit-sub">~4,400 searches/mo · high intent</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-fail"><i class="ti ti-x"></i></div><div><div class="audit-text">Score improvement guarantee / retake policy — competitor differentiator</div><div class="audit-sub">Kaplan + AMBOSS both feature prominently</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-warn"><i class="ti ti-alert-triangle"></i></div><div><div class="audit-text">Free trial / sample questions section — present but thin (&lt;200 words)</div><div class="audit-sub">Avg competitor word count: 820 words on this topic</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-warn"><i class="ti ti-alert-triangle"></i></div><div><div class="audit-text">Study schedule templates and planning guides</div><div class="audit-sub">High-engagement asset · competitors earn backlinks from it</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-fail"><i class="ti ti-x"></i></div><div><div class="audit-text">Video explanations / media variety — page is text-only</div><div class="audit-sub">AMBOSS embeds 40+ videos · avg session 3.1× longer</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-pass"><i class="ti ti-check"></i></div><div><div class="audit-text">Peer reviews and student testimonials — well covered</div><div class="audit-sub">4.8★ · 12,000+ reviews displayed</div></div></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin:0;">
+            <div class="card-head"><div class="card-title"><i class="ti ti-help-circle"></i>People also ask · top questions</div></div>
+            <div style="display:flex;flex-direction:column;gap:5px;" id="paaList">
+              <div style="background:var(--ink-3);border-radius:7px;padding:10px 12px;">
+                <div style="font-size:13px;font-weight:500;margin-bottom:3px;">Is UWorld enough for USMLE Step 1?</div>
+                <div style="font-size:11px;color:var(--text-3);display:flex;gap:12px;"><span>Vol: 8,100/mo</span><span style="color:var(--good);">✓ Answered on page</span></div>
+              </div>
+              <div style="background:var(--ink-3);border-radius:7px;padding:10px 12px;">
+                <div style="font-size:13px;font-weight:500;margin-bottom:3px;">How many UWorld questions per day for Step 1?</div>
+                <div style="font-size:11px;color:var(--text-3);display:flex;gap:12px;"><span>Vol: 5,400/mo</span><span style="color:var(--bad);">✗ Not addressed</span></div>
+              </div>
+              <div style="background:var(--ink-3);border-radius:7px;padding:10px 12px;">
+                <div style="font-size:13px;font-weight:500;margin-bottom:3px;">UWorld vs AMBOSS — which is better?</div>
+                <div style="font-size:11px;color:var(--text-3);display:flex;gap:12px;"><span>Vol: 12,000/mo</span><span style="color:var(--bad);">✗ Not addressed</span></div>
+              </div>
+              <div style="background:var(--ink-3);border-radius:7px;padding:10px 12px;">
+                <div style="font-size:13px;font-weight:500;margin-bottom:3px;">How long does UWorld access last?</div>
+                <div style="font-size:11px;color:var(--text-3);display:flex;gap:12px;"><span>Vol: 3,600/mo</span><span style="color:var(--warn);">~ Partially answered</span></div>
+              </div>
+              <div style="background:var(--ink-3);border-radius:7px;padding:10px 12px;">
+                <div style="font-size:13px;font-weight:500;margin-bottom:3px;">What is the average UWorld score to pass Step 1?</div>
+                <div style="font-size:11px;color:var(--text-3);display:flex;gap:12px;"><span>Vol: 6,600/mo</span><span style="color:var(--bad);">✗ Not addressed</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Backlink gap + Social listening -->
+        <div class="pd-grid-2" style="margin-bottom:20px;">
+          <div class="card" style="margin:0;">
+            <div class="card-head">
+              <div class="card-title"><i class="ti ti-link"></i>Backlink gap analysis</div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;">High-value domains linking to competitors but not you</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--ink-3);border-radius:6px;">
+                  <div><div style="font-size:13px;font-weight:500;">reddit.com</div><div style="font-size:11px;color:var(--text-3);">r/step1, r/medicalschool — 847 mentions of competitors</div></div>
+                  <span class="pill pill-bad" style="flex-shrink:0;">DA 95</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--ink-3);border-radius:6px;">
+                  <div><div style="font-size:13px;font-weight:500;">studentdoctor.net</div><div style="font-size:11px;color:var(--text-3);">Forum threads recommend competitors 3:1 vs UWorld</div></div>
+                  <span class="pill pill-warn" style="flex-shrink:0;">DA 67</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--ink-3);border-radius:6px;">
+                  <div><div style="font-size:13px;font-weight:500;">aamc.org</div><div style="font-size:11px;color:var(--text-3);">Resource list links AMBOSS but not UWorld</div></div>
+                  <span class="pill pill-bad" style="flex-shrink:0;">DA 88</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--ink-3);border-radius:6px;">
+                  <div><div style="font-size:13px;font-weight:500;">medscape.com</div><div style="font-size:11px;color:var(--text-3);">Study resource recommendations page — gap opportunity</div></div>
+                  <span class="pill pill-warn" style="flex-shrink:0;">DA 82</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin:0;">
+            <div class="card-head"><div class="card-title"><i class="ti ti-brand-reddit"></i>Social listening · sentiment</div></div>
+            <div style="display:flex;gap:16px;margin-bottom:16px;">
+              <div style="flex:1;text-align:center;background:var(--ink-3);border-radius:8px;padding:14px 10px;">
+                <div style="font-size:26px;font-weight:700;color:var(--good);">68%</div>
+                <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;">Positive</div>
+              </div>
+              <div style="flex:1;text-align:center;background:var(--ink-3);border-radius:8px;padding:14px 10px;">
+                <div style="font-size:26px;font-weight:700;color:var(--text-2);">22%</div>
+                <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;">Neutral</div>
+              </div>
+              <div style="flex:1;text-align:center;background:var(--ink-3);border-radius:8px;padding:14px 10px;">
+                <div style="font-size:26px;font-weight:700;color:var(--bad);">10%</div>
+                <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;">Negative</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;">Top recurring themes (last 90 days)</div>
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--good);">✓ Detailed explanations praised</span><span style="color:var(--text-3);">1,240 mentions</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--good);">✓ Question difficulty accuracy</span><span style="color:var(--text-3);">890 mentions</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--bad);">✗ Price perceived as high</span><span style="color:var(--text-3);">534 mentions</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--bad);">✗ UI/UX complaints (mobile app)</span><span style="color:var(--text-3);">312 mentions</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--warn);">~ Asks about free trial availability</span><span style="color:var(--text-3);">278 mentions</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 4: E-E-A-T + Trending topics -->
+        <div class="pd-grid-2" style="margin-bottom:20px;">
+          <div class="card" style="margin:0;">
+            <div class="card-head"><div class="card-title"><i class="ti ti-certificate"></i>E-E-A-T signals</div></div>
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <div class="audit-row"><div class="audit-ic ai-pass"><i class="ti ti-check"></i></div><div><div class="audit-text">Author / expert byline present</div><div class="audit-sub">Dr. Sarah Chen, MD — credentials displayed with profile</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-pass"><i class="ti ti-check"></i></div><div><div class="audit-text">Content last updated date visible</div><div class="audit-sub">Updated April 2025 — freshness signal strong</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-warn"><i class="ti ti-alert-triangle"></i></div><div><div class="audit-text">External citations / references section</div><div class="audit-sub">Only 2 citations — top competitor has 18 authoritative links</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-fail"><i class="ti ti-x"></i></div><div><div class="audit-text">Medical review board / editorial policy link</div><div class="audit-sub">AMBOSS and Kaplan both surface this prominently</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-pass"><i class="ti ti-check"></i></div><div><div class="audit-text">Organization structured data (schema.org)</div><div class="audit-sub">Publisher schema present and valid</div></div></div>
+              <div class="audit-row"><div class="audit-ic ai-warn"><i class="ti ti-alert-triangle"></i></div><div><div class="audit-text">FAQ schema markup</div><div class="audit-sub">Present but covers only 3 questions — expand to 8+</div></div></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin:0;">
+            <div class="card-head"><div class="card-title"><i class="ti ti-trending-up"></i>Trending topics · rising searches</div></div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--ink-3);border-radius:7px;">
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:500;">USMLE Step 1 P/F impact on residency</div>
+                  <div style="font-size:11px;color:var(--text-3);">2,900 searches/mo · +340% YoY</div>
+                </div>
+                <span class="pill pill-bad" style="flex-shrink:0;">Not covered</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--ink-3);border-radius:7px;">
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:500;">AI-assisted USMLE prep tools</div>
+                  <div style="font-size:11px;color:var(--text-3);">4,400 searches/mo · +210% YoY</div>
+                </div>
+                <span class="pill pill-warn" style="flex-shrink:0;">Thin</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--ink-3);border-radius:7px;">
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:500;">UWorld Step 2 CK 2025 updates</div>
+                  <div style="font-size:11px;color:var(--text-3);">3,100 searches/mo · +88% YoY</div>
+                </div>
+                <span class="pill pill-bad" style="flex-shrink:0;">Not covered</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--ink-3);border-radius:7px;">
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:500;">Free medical question bank comparison</div>
+                  <div style="font-size:11px;color:var(--text-3);">6,800 searches/mo · +65% YoY</div>
+                </div>
+                <span class="pill pill-warn" style="flex-shrink:0;">Partial</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--ink-3);border-radius:7px;">
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:500;">International medical graduate USMLE strategy</div>
+                  <div style="font-size:11px;color:var(--text-3);">5,200 searches/mo · +52% YoY</div>
+                </div>
+                <span class="pill pill-bad" style="flex-shrink:0;">Not covered</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Action plan -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i class="ti ti-sparkles"></i>AI-generated action plan · research findings</div>
+            <span class="pill pill-good">8 actions</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="audit-row">
+              <div style="min-width:56px;text-align:center;font-size:11px;font-weight:700;color:var(--good);background:var(--good-soft);border-radius:6px;padding:4px 0;">Critical</div>
+              <div><div class="audit-text">Create a 1,200-word "UWorld vs AMBOSS" comparison section — this query drives 12,000 searches/mo and all top 3 competitors rank for it. Direct revenue opportunity.</div></div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:56px;text-align:center;font-size:11px;font-weight:700;color:var(--good);background:var(--good-soft);border-radius:6px;padding:4px 0;">Critical</div>
+              <div><div class="audit-text">Address "how many questions per day" PAA box — 5,400 searches/mo, zero presence on this page, easy FAQ addition that competitors rank for.</div></div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:56px;text-align:center;font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:4px 0;">High</div>
+              <div><div class="audit-text">Add editorial review policy and medical review board page, link from this page — E-E-A-T gap directly reduces AI Overview citation probability.</div></div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:56px;text-align:center;font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:4px 0;">High</div>
+              <div><div class="audit-text">Publish a "USMLE Step 1 P/F impact" content piece and link from this page — +340% YoY trend with no competitor owning it yet. First-mover opportunity.</div></div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:56px;text-align:center;font-size:11px;font-weight:700;color:var(--info);background:var(--info-soft);border-radius:6px;padding:4px 0;">Medium</div>
+              <div><div class="audit-text">Outreach to aamc.org resources page — currently links AMBOSS. Adding UWorld here would provide a DA 88 backlink and significant referral traffic.</div></div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:56px;text-align:center;font-size:11px;font-weight:700;color:var(--info);background:var(--info-soft);border-radius:6px;padding:4px 0;">Medium</div>
+              <div><div class="audit-text">Expand FAQ schema from 3 to 8+ questions using the unanswered PAA queries — increases SERP real estate and AI Overview citation probability.</div></div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:56px;text-align:center;font-size:11px;font-weight:700;color:var(--info);background:var(--info-soft);border-radius:6px;padding:4px 0;">Medium</div>
+              <div><div class="audit-text">Address pricing objection surfaced in social listening (534 mentions) — add value-framing section explaining cost-per-question vs alternatives.</div></div>
+            </div>
+            <div class="audit-row">
+              <div style="min-width:56px;text-align:center;font-size:11px;font-weight:700;color:var(--text-2);background:var(--ink-3);border-radius:6px;padding:4px 0;">Low</div>
+              <div><div class="audit-text">Add 15+ external authoritative citations — current 2 citations significantly below top-3 average of 14 and weakens E-E-A-T scoring.</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(location.search);
+    const site    = params.get('site') || 'uworld-medical';
+    const pageUrl = params.get('page') || '/';
+    const pageName = params.get('name') || 'Page';
+    const initTab  = params.get('tab')  || 'overview';
+
+    // Populate header
+    document.getElementById('pageTitle').textContent = pageName;
+    document.getElementById('pageUrl').textContent   = pageUrl;
+    document.getElementById('urlCrumb').textContent  = pageUrl;
+    document.getElementById('pageSite').textContent  = site + '.com';
+    const siteLink = document.getElementById('siteLink');
+    siteLink.href        = 'site-detail.html?site=' + site;
+    siteLink.textContent = site + '.com';
+    document.title = pageName + ' · ' + site + ' · UWorld';
+
+    // Tab switching
+    function activateTab(name) {
+      document.querySelectorAll('.detail-tab').forEach(t =>
+        t.classList.toggle('active', t.dataset.tab === name));
+      document.querySelectorAll('.tab-panel').forEach(p =>
+        p.classList.toggle('active', p.id === 'tab-' + name));
+      const u = new URL(location.href);
+      u.searchParams.set('tab', name);
+      history.replaceState(null, '', u);
+      if (name === 'overview')   renderOverviewChart();
+      if (name === 'heatmap')    renderDevicePie();
+    }
+
+    document.querySelectorAll('.detail-tab').forEach(btn =>
+      btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
+
+    activateTab(initTab);
+
+    // Overview chart
+    function renderOverviewChart() {
+      const canvas = document.getElementById('overviewChart');
+      if (!canvas || canvas._rendered) return;
+      canvas._rendered = true;
+      const labels = Array.from({length: 30}, (_, i) => 'D' + (i + 1));
+      const data   = labels.map((_, i) => 2100 + Math.sin(i / 3.5) * 420 + i * 28 + Math.random() * 320);
+      new Chart(canvas, {
+        type: 'line',
+        data: { labels, datasets: [{ data, borderColor: '#D4A574', backgroundColor: 'rgba(212,165,116,0.07)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => Math.round(c.parsed.y).toLocaleString() + ' sessions' } } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 10 }, maxTicksLimit: 8 } },
+            y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { size: 10 }, callback: v => (v / 1000).toFixed(1) + 'K' } }
+          }
+        }
+      });
+    }
+
+    // Device pie
+    function renderDevicePie() {
+      const canvas = document.getElementById('devicePie');
+      if (!canvas || canvas._rendered) return;
+      canvas._rendered = true;
+      new Chart(canvas, {
+        type: 'doughnut',
+        data: { labels: ['Desktop', 'Mobile', 'Tablet'], datasets: [{ data: [48, 38, 14], backgroundColor: ['#D4A574', '#6c63ff', '#4ade80'], borderWidth: 0 }] },
+        options: { responsive: false, cutout: '70%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.label + ': ' + c.parsed + '%' } } } }
+      });
+    }
+
+    // Keywords table (demo data; would be page-specific in production)
+    const kws = [
+      { kw: 'usmle step 1 qbank',      pos: 2, vol: '84K' },
+      { kw: 'usmle practice questions', pos: 3, vol: '62K' },
+      { kw: 'step 1 question bank',     pos: 4, vol: '38K' },
+      { kw: 'free usmle questions',     pos: 6, vol: '28K' },
+      { kw: 'usmle q bank review',      pos: 8, vol: '14K' },
+    ];
+    const posColor = p => p <= 3 ? 'var(--good)' : p <= 7 ? 'var(--warn)' : 'var(--bad)';
+    document.getElementById('kwTable').innerHTML = kws.map(k =>
+      `<tr><td style="font-size:12px;">${k.kw}</td><td class="num right" style="color:${posColor(k.pos)};">#${k.pos}</td><td class="num right" style="font-size:12px;">${k.vol}</td></tr>`
+    ).join('');
+
+    if (initTab === 'overview') renderOverviewChart();
+  });
+</script>
+</body>
+</html>
+
